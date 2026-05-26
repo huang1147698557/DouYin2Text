@@ -5,6 +5,9 @@ const fileBlock = document.getElementById("fileBlock");
 const fileInput = document.getElementById("fileInput");
 const fileName = document.getElementById("fileName");
 const dropzone = document.getElementById("dropzone");
+const asrProviderSelect = document.getElementById("asrProviderSelect");
+const whisperModelField = document.getElementById("whisperModelField");
+const whisperModelSelect = document.getElementById("whisperModelSelect");
 const clearButton = document.getElementById("clearButton");
 const extractForm = document.getElementById("extractForm");
 const submitButton = document.getElementById("submitButton");
@@ -64,6 +67,25 @@ function renderParagraphs(rawText, paragraphs = []) {
   }
 }
 
+function formatRequestedProvider(value) {
+  if (value === "volcengine") {
+    return "火山模型";
+  }
+  if (value === "whisper") {
+    return "Whisper";
+  }
+  if (value === "auto") {
+    return "自动";
+  }
+  return value;
+}
+
+function syncAsrFields() {
+  const useWhisper = asrProviderSelect.value === "whisper";
+  whisperModelField.classList.toggle("hidden", !useWhisper);
+  whisperModelSelect.disabled = !useWhisper;
+}
+
 function setMediaLinks(data) {
   if (data.video_url) {
     videoPlayer.src = data.video_url;
@@ -90,7 +112,9 @@ function setChips(data) {
   metaChips.innerHTML = "";
   const chips = [
     data.mode === "url" ? "链接模式" : "文件模式",
+    data.requested_asr_provider ? `选择: ${formatRequestedProvider(data.requested_asr_provider)}` : null,
     data.asr_provider ? `ASR: ${data.asr_provider}` : null,
+    data.whisper_model ? `Whisper: ${data.whisper_model}` : null,
     data.author ? `作者: ${data.author}` : null,
     data.mcp_transport ? `MCP: ${data.mcp_transport}` : null,
   ].filter(Boolean);
@@ -150,6 +174,7 @@ clearButton.addEventListener("click", () => {
   extractForm.reset();
   fileName.textContent = "尚未选择文件";
   setMode("url");
+  syncAsrFields();
 });
 
 fileInput.addEventListener("change", () => {
@@ -176,6 +201,10 @@ dropzone.addEventListener("drop", (event) => {
   if (!file) return;
   fileInput.files = event.dataTransfer.files;
   fileName.textContent = file.name;
+});
+
+asrProviderSelect.addEventListener("change", () => {
+  syncAsrFields();
 });
 
 historyToggle.addEventListener("click", async () => {
@@ -293,3 +322,4 @@ extractForm.addEventListener("submit", async (event) => {
 });
 
 setMode("url");
+syncAsrFields();

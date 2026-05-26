@@ -28,6 +28,8 @@ API_KEY   = "763b0781bd293135b391347ebb83c7a9"
 MCP_ENDPOINT = f"{BASE_URL}/mcp?key={API_KEY}"
 VOLCENGINE_FLASH_URL = "https://openspeech.bytedance.com/api/v3/auc/bigmodel/recognize/flash"
 CONFIG_PATH = Path(__file__).with_name("config.json")
+WHISPER_MODEL_CHOICES = ("tiny", "base", "small", "medium", "large")
+SUPPORTED_ASR_PROVIDERS = {"auto", "volcengine", "whisper"}
 
 # ── MCP 客户端（优先走 MCP，必要时回退 REST）──────────────────────────────────
 
@@ -107,6 +109,13 @@ def load_config() -> dict:
 def get_volcengine_config() -> dict:
     config = load_config()
     return config.get("volcengine_asr", {})
+
+
+def normalize_asr_provider(provider: Optional[str], default: str = "auto") -> str:
+    value = (provider or "").strip().lower()
+    if value in SUPPORTED_ASR_PROVIDERS:
+        return value
+    return default
 
 
 def has_volcengine_credentials(cfg: Optional[dict] = None) -> bool:
@@ -452,6 +461,35 @@ def split_text_into_lines(text: str, max_chars: int = 36) -> list[str]:
     return [normalize_text_line(piece) for piece in pieces if normalize_text_line(piece)]
 
 
+def looks_like_share_input(text: str) -> bool:
+    clean = (text or "").strip().lower()
+    return clean.startswith(("http://", "https://")) or "douyin" in clean or "v.dy" in clean
+
+
+def extract_share_url(text: str) -> str:
+    clean = normalize_text_line(text)
+    if not clean:
+        raise RuntimeError("请输入抖音链接或包含链接的分享文案。")
+
+    matches = [
+        match.rstrip("，。！？；：,.!?:;)]】}>\"'")
+        for match in re.findall(r"https?://[^\s\"'<>]+", clean, flags=re.IGNORECASE)
+    ]
+    if not matches and clean.startswith(("http://", "https://")):
+        matches = [clean.rstrip("，。！？；：,.!?:;)]】}>\"'")]
+
+    if not matches:
+        raise RuntimeError("未从输入内容中提取到可用链接，请粘贴抖音分享链接或整段分享文案。")
+
+    preferred = []
+    for url in matches:
+        hostname = urllib.parse.urlparse(url).netloc.lower()
+        if any(domain in hostname for domain in ("douyin.com", "iesdouyin.com", "v.dy")):
+            preferred.append(url)
+
+    return (preferred or matches)[0]
+
+
 # ── ASR (Whisper 语音识别) ────────────────────────────────────────────────────
 
 def extract_audio(video_path: str, audio_path: str) -> bool:
@@ -613,13 +651,14 @@ def run_whisper_asr(video_path: str, model_name: str = "base") -> dict:
 def run_asr(
     video_path: str,
     model_name: str = "base",
+    provider_override: Optional[str] = None,
 ) -> dict:
     """
     优先尝试火山引擎极速版文件识别 API。
     当没有配置或调用失败时，自动回退到 Whisper。
     """
     cfg = get_volcengine_config()
-    provider = cfg.get("provider", "auto")
+    provider = normalize_asr_provider(provider_override, normalize_asr_provider(cfg.get("provider"), "auto"))
 
     should_try_volc = provider in ("auto", "volcengine")
     if should_try_volc and has_volcengine_credentials(cfg):
@@ -658,12 +697,17 @@ def materialize_stdin_stream(output_dir: str) -> str:
 
 # ── 主流程 ────────────────────────────────────────────────────────────────────
 
-def process_url(url: str, output_dir: str, whisper_model: str) -> dict:
+def process_url(url: str, output_dir: str, whisper_model: str, asr_provider: Optional[str] = None) -> dict:
     """抖音链接模式：解析 -> 下载视频 -> ASR。"""
     os.makedirs(output_dir, exist_ok=True)
+    resolved_url = extract_share_url(url)
+    requested_provider = normalize_asr_provider(
+        asr_provider,
+        normalize_asr_provider(get_volcengine_config().get("provider"), "auto"),
+    )
 
     # 1. 解析链接
-    meta = parse_douyin_url(url)
+    meta = parse_douyin_url(resolved_url)
     if not meta:
         raise RuntimeError("链接解析失败，未获得有效数据")
 
@@ -693,12 +737,13 @@ def process_url(url: str, output_dir: str, whisper_model: str) -> dict:
         download_file(cover_url, cover_path, "封面")
 
     # 4. ASR
-    asr_result = run_asr(video_path, model_name=whisper_model)
+    asr_result = run_asr(video_path, model_name=whisper_model, provider_override=asr_provider)
     video_meta = probe_media_metadata(video_path)
 
     return {
         "mode": "url",
-        "url": url,
+        "url": resolved_url,
+        "input_text": url,
         "title": title or raw_text,
         "author": author,
         "raw_desc": raw_text,
@@ -707,25 +752,33 @@ def process_url(url: str, output_dir: str, whisper_model: str) -> dict:
         "video_metadata": video_meta,
         "mcp_transport": meta.get("mcp_transport"),
         "mcp_tool": meta.get("mcp_tool"),
+        "requested_asr_provider": requested_provider,
+        "whisper_model": whisper_model if requested_provider == "whisper" else None,
         "asr_provider": asr_result.get("provider"),
         "asr_raw_text": asr_result["raw_text"],
         "meta": meta,
     }
 
 
-def process_video(video_path: str, whisper_model: str) -> dict:
+def process_video(video_path: str, whisper_model: str, asr_provider: Optional[str] = None) -> dict:
     """本地视频模式：直接 ASR。"""
     if not os.path.isfile(video_path):
         raise FileNotFoundError(f"文件不存在: {video_path}")
 
     print(f"[本地视频] {video_path}")
-    asr_result = run_asr(video_path, model_name=whisper_model)
+    requested_provider = normalize_asr_provider(
+        asr_provider,
+        normalize_asr_provider(get_volcengine_config().get("provider"), "auto"),
+    )
+    asr_result = run_asr(video_path, model_name=whisper_model, provider_override=asr_provider)
     video_meta = probe_media_metadata(video_path)
 
     return {
         "mode": "file",
         "video_path": video_path,
         "video_metadata": video_meta,
+        "requested_asr_provider": requested_provider,
+        "whisper_model": whisper_model if requested_provider == "whisper" else None,
         "asr_provider": asr_result.get("provider"),
         "asr_raw_text": asr_result["raw_text"],
     }
@@ -765,7 +818,7 @@ def main():
     parser.add_argument(
         "-m", "--model",
         default="base",
-        choices=["tiny", "base", "small", "medium", "large"],
+        choices=list(WHISPER_MODEL_CHOICES),
         help="Whisper 模型大小（越大越准但越慢），默认 base",
     )
     parser.add_argument(
@@ -781,7 +834,7 @@ def main():
 
     # 判断模式
     inp = args.input.strip()
-    is_url = inp.startswith("http") or "douyin" in inp or "v.dy" in inp
+    is_url = looks_like_share_input(inp) or bool(re.search(r"https?://", inp, flags=re.IGNORECASE))
 
     try:
         if args.stdin or inp == "-":

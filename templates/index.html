@@ -68,16 +68,26 @@
             </div>
 
             <div class="toolbar">
-              <label class="field-inline">
-                <span>Whisper 回退模型</span>
-                <select name="model">
-                  <option value="tiny">tiny</option>
-                  <option value="base" selected>base</option>
-                  <option value="small">small</option>
-                  <option value="medium">medium</option>
-                  <option value="large">large</option>
-                </select>
-              </label>
+              <div class="toolbar-fields">
+                <label class="field-inline">
+                  <span>识别引擎</span>
+                  <select name="asr_provider" id="asrProviderSelect">
+                    <option value="volcengine" selected>火山模型</option>
+                    <option value="whisper">Whisper</option>
+                  </select>
+                </label>
+
+                <label class="field-inline hidden" id="whisperModelField">
+                  <span>Whisper 模型大小</span>
+                  <select name="model" id="whisperModelSelect" disabled>
+                    <option value="tiny">tiny</option>
+                    <option value="base" selected>base</option>
+                    <option value="small">small</option>
+                    <option value="medium">medium</option>
+                    <option value="large">large</option>
+                  </select>
+                </label>
+              </div>
 
               <div class="toolbar-actions">
                 <button class="secondary-button" id="clearButton" type="button">清空</button>
@@ -92,9 +102,9 @@
         <aside class="panel side-panel">
           <p class="panel-label">使用建议</p>
           <ul class="tips">
-            <li>链接模式适合直接处理抖音分享内容。</li>
+            <li>链接模式支持整段分享文案，系统会自动抽取其中的抖音链接。</li>
             <li>上传模式适合本地视频或二次剪辑素材。</li>
-            <li>极速版 ASR 会优先执行，失败时自动回退。</li>
+            <li>识别引擎可以手动切换为火山模型或 Whisper。</li>
             <li>结果区保留原始文案、视频元数据和识别全文。</li>
           </ul>
         </aside>

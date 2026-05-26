@@ -18,6 +18,8 @@ from douyin2text import (
 
 BASE_DIR = Path(__file__).resolve().parent
 WEB_OUTPUT_DIR = BASE_DIR / "output" / "web"
+CONFIG_PATH = BASE_DIR / "config.json"
+SUPPORTED_ASR_PROVIDERS = {"auto", "volcengine", "whisper"}
 WEB_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
@@ -53,6 +55,8 @@ def build_web_result(job_id: str, result: dict) -> dict:
         "author": result.get("author"),
         "raw_desc": result.get("raw_desc"),
         "asr_provider": result.get("asr_provider"),
+        "requested_asr_provider": result.get("requested_asr_provider"),
+        "whisper_model": result.get("whisper_model"),
         "asr_raw_text": raw_text,
         "asr_paragraphs": paragraphs,
         "video_metadata": result.get("video_metadata") or {},
@@ -64,6 +68,41 @@ def build_web_result(job_id: str, result: dict) -> dict:
         "cover_url": build_file_url(result.get("cover_path")),
     }
     return payload
+
+
+def normalize_provider(value: str | None, default: str = "auto") -> str:
+    provider = (value or "").strip().lower()
+    if provider in SUPPORTED_ASR_PROVIDERS:
+        return provider
+    return default
+
+
+def load_app_config() -> dict:
+    if not CONFIG_PATH.exists():
+        return {}
+
+    with CONFIG_PATH.open("r", encoding="utf-8") as f:
+        config = json.load(f)
+
+    if not isinstance(config, dict):
+        raise RuntimeError("config.json 格式无效，顶层必须为 JSON 对象。")
+    return config
+
+
+def get_volcengine_settings(config: dict | None = None) -> dict:
+    config = config if config is not None else load_app_config()
+    raw_volcengine = config.get("volcengine_asr")
+    if raw_volcengine is not None and not isinstance(raw_volcengine, dict):
+        raise RuntimeError("config.json 中 volcengine_asr 必须是对象。")
+
+    volcengine = raw_volcengine or {}
+    return {
+        "provider": normalize_provider(volcengine.get("provider") or config.get("provider"), "auto"),
+        "app_id": volcengine.get("app_id") or config.get("app_id", ""),
+        "access_token": volcengine.get("access_token") or config.get("access_token", ""),
+        "api_key": volcengine.get("api_key") or config.get("api_key", ""),
+        "uid": volcengine.get("uid") or config.get("uid", ""),
+    }
 
 
 def persist_result(job_dir: Path, payload: dict) -> None:
@@ -100,6 +139,7 @@ def history():
 def extract():
     mode = request.form.get("mode", "url").strip()
     whisper_model = request.form.get("model", "base").strip() or "base"
+    requested_asr_provider = normalize_provider(request.form.get("asr_provider"), "auto")
     job_id, job_dir = create_job_dir()
 
     try:
@@ -111,14 +151,23 @@ def extract():
             suffix = Path(secure_filename(upload.filename)).suffix or ".mp4"
             input_path = job_dir / f"input{suffix}"
             upload.save(input_path)
-            result = process_video(str(input_path), whisper_model)
+            result = process_video(
+                str(input_path),
+                whisper_model,
+                requested_asr_provider,
+            )
             if not result.get("video_path"):
                 result["video_path"] = str(input_path)
         else:
             raw_input = request.form.get("url", "").strip()
             if not raw_input:
                 return jsonify({"error": "请输入抖音链接或分享文案。"}), 400
-            result = process_url(raw_input, str(job_dir), whisper_model)
+            result = process_url(
+                raw_input,
+                str(job_dir),
+                whisper_model,
+                requested_asr_provider,
+            )
 
         payload = build_web_result(job_id, result)
         persist_result(job_dir, payload)
@@ -136,25 +185,17 @@ def serve_output_file(path: str):
 @app.get("/api/settings")
 def get_settings():
     """Get current configuration settings."""
-    config_path = BASE_DIR / "config.json"
-    if not config_path.exists():
+    if not CONFIG_PATH.exists():
         return jsonify({
+            "provider": "auto",
             "app_id": "",
             "access_token": "",
             "api_key": "",
             "uid": "",
         })
-    
+
     try:
-        with open(config_path, "r", encoding="utf-8") as f:
-            config = json.load(f)
-        
-        return jsonify({
-            "app_id": config.get("app_id", ""),
-            "access_token": config.get("access_token", ""),
-            "api_key": config.get("api_key", ""),
-            "uid": config.get("uid", ""),
-        })
+        return jsonify(get_volcengine_settings())
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -163,35 +204,36 @@ def get_settings():
 def save_settings():
     """Save configuration settings."""
     try:
-        data = request.get_json()
-        if not data:
+        data = request.get_json(silent=True)
+        if not isinstance(data, dict):
             return jsonify({"error": "Invalid request"}), 400
-        
-        config_path = BASE_DIR / "config.json"
-        config = {}
-        
-        # Load existing config if exists
-        if config_path.exists():
-            try:
-                with open(config_path, "r", encoding="utf-8") as f:
-                    config = json.load(f)
-            except:
-                pass
-        
-        # Update with new values
-        config["app_id"] = data.get("app_id", "").strip()
-        config["access_token"] = data.get("access_token", "").strip()
-        config["api_key"] = data.get("api_key", "").strip()
-        config["uid"] = data.get("uid", "").strip() or "douyin2text"
-        
-        # Ensure provider is set
-        if "provider" not in config:
-            config["provider"] = "auto"
-        
-        # Save config
-        with open(config_path, "w", encoding="utf-8") as f:
+
+        config = load_app_config()
+        existing = get_volcengine_settings(config)
+        provider = normalize_provider(data.get("provider"), existing["provider"])
+        volcengine = config.get("volcengine_asr") or {}
+        if not isinstance(volcengine, dict):
+            raise RuntimeError("config.json 中 volcengine_asr 必须是对象。")
+
+        volcengine.update({
+            "provider": provider,
+            "app_id": data.get("app_id", "").strip(),
+            "access_token": data.get("access_token", "").strip(),
+            "api_key": data.get("api_key", "").strip(),
+            "uid": data.get("uid", "").strip() or "douyin2text",
+        })
+        config["volcengine_asr"] = volcengine
+
+        # 兼容旧版顶层字段，同时保证 CLI 读取的嵌套配置保持一致。
+        config["provider"] = volcengine["provider"]
+        config["app_id"] = volcengine["app_id"]
+        config["access_token"] = volcengine["access_token"]
+        config["api_key"] = volcengine["api_key"]
+        config["uid"] = volcengine["uid"]
+
+        with CONFIG_PATH.open("w", encoding="utf-8") as f:
             json.dump(config, f, indent=2, ensure_ascii=False)
-        
+
         return jsonify({"success": True})
     except Exception as e:
         return jsonify({"error": str(e)}), 500

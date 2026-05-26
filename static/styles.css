@@ -67,8 +67,8 @@ body {
 }
 
 .shell {
-  width: min(1400px, calc(100% - 32px));
-  margin: 0 auto;
+  width: min(1760px, calc(100vw - 20px));
+  margin: 0 10px 0 auto;
   padding: 40px 0 60px;
 }
 
@@ -111,8 +111,8 @@ body {
 }
 
 .hero h1 {
-  max-width: 12ch;
-  font-size: clamp(28px, 3.6vw, 44px);
+  max-width: 18ch;
+  font-size: clamp(32px, 3.4vw, 52px);
   line-height: 1.15;
 }
 
@@ -168,7 +168,7 @@ body {
 }
 
 .workspace {
-  grid-template-columns: minmax(0, 1.6fr) minmax(280px, 0.55fr);
+  grid-template-columns: minmax(0, 2fr) minmax(260px, 0.42fr);
   margin-bottom: 28px;
 }
 
@@ -314,8 +314,16 @@ select:focus,
   flex-wrap: wrap;
 }
 
+.toolbar-fields {
+  display: flex;
+  gap: 14px;
+  flex: 1 1 420px;
+  flex-wrap: wrap;
+}
+
 .field-inline {
   min-width: 220px;
+  flex: 1 1 220px;
 }
 
 .toolbar-actions {
@@ -342,13 +350,14 @@ select:focus,
 
 .result-grid {
   display: grid;
-  grid-template-columns: minmax(360px, 0.9fr) minmax(0, 1.1fr);
+  grid-template-columns: minmax(340px, 0.82fr) minmax(0, 1.58fr);
   gap: 22px;
+  align-items: start;
 }
 
 .video-frame {
   position: relative;
-  min-height: 360px;
+  min-height: 400px;
   border-radius: 28px;
   background:
     radial-gradient(circle at top, rgba(67, 208, 136, 0.22), transparent 28%),
@@ -392,6 +401,7 @@ select:focus,
 .detail-stack {
   display: grid;
   gap: 16px;
+  min-width: 0;
 }
 
 .detail-card {
@@ -643,7 +653,8 @@ select:focus,
 
 @media (max-width: 720px) {
   .shell {
-    width: min(100% - 24px, 1320px);
+    width: min(100vw - 16px, 1320px);
+    margin-right: 8px;
     padding-top: 24px;
   }
 
@@ -659,6 +670,10 @@ select:focus,
 
   .toolbar {
     align-items: stretch;
+  }
+
+  .toolbar-fields {
+    width: 100%;
   }
 
   .toolbar-actions {
