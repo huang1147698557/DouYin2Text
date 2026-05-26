@@ -1,0 +1,25 @@
+{
+  "volcengine_asr": {
+    "provider": "auto",
+    "app_id": "",
+    "access_token": "",
+    "secret_key": "",
+    "api_key": "",
+    "resource_id": "volc.bigasr.auc_turbo",
+    "model_name": "bigmodel",
+    "language": "zh-CN",
+    "uid": "douyin2text",
+    "audio_format": "mp3",
+    "enable_itn": true,
+    "enable_punc": true,
+    "enable_ddc": true,
+    "show_utterances": true,
+    "show_speech_rate": false,
+    "show_volume": false,
+    "enable_speaker_info": false,
+    "enable_channel_split": false,
+    "enable_lid": false,
+    "poll_interval_seconds": 2,
+    "poll_timeout_seconds": 600
+  }
+}
