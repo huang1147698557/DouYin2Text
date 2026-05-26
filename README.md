@@ -21,6 +21,87 @@
 pip install openai-whisper requests
 ```
 
+## 启动 Web 服务
+
+本项目提供可视化 Web 界面，支持链接提取、视频上传、结果预览和历史回看。
+
+### 前置要求
+
+- Python 3.10+
+- `ffmpeg`（系统级，需已安装）
+
+### 详细步骤
+
+1. **创建并激活虚拟环境**（推荐）
+
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate  # macOS/Linux
+   # 或 Windows: .venv\Scripts\activate
+   ```
+
+2. **安装 Python 依赖**
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+   依赖包包括：
+   - `flask`：Web 服务框架
+   - `requests`：HTTP 请求库
+   - `openai-whisper`：本地语音识别模型
+
+3. **安装 ffmpeg**
+
+   **macOS**（使用 Homebrew）：
+   ```bash
+   brew install ffmpeg
+   ```
+
+   **Ubuntu/Debian**：
+   ```bash
+   sudo apt update && sudo apt install ffmpeg
+   ```
+
+   **Windows**：下载并安装 [ffmpeg](https://ffmpeg.org/download.html)，并添加到系统 PATH。
+
+4. **准备配置文件**
+
+   ```bash
+   cp config.example.json config.json
+   ```
+
+   然后编辑 `config.json`，填入火山引擎 ASR 凭证。若你只想先验证页面能不能跑起来，也可以先保留默认配置，等真正开始提取时再补齐。
+
+   **配置说明**：
+   - 旧版控制台可填 `app_id + access_token`
+   - 新版控制台可直接填 `api_key`
+   - `provider` 可选：`auto`（优先火山引擎，失败回退 Whisper）、`volcengine`（只用火山引擎）、`whisper`（只用本地 Whisper）
+
+5. **启动 Web 服务**
+
+   ```bash
+   python3 app.py
+   ```
+
+   服务将在本地 `127.0.0.1:5088` 启动，`debug=True` 模式下支持热重载。
+
+6. **打开浏览器访问**
+
+   ```text
+   http://127.0.0.1:5088
+   ```
+
+7. **关闭服务**
+
+   在启动服务的终端里按 `Ctrl + C` 即可。
+
+### 常见问题
+
+- **端口被占用**：修改 `app.py` 最后一行的 `port=5088` 为其他端口号。
+- **ASR 识别失败**：检查 `config.json` 中火山引擎凭证是否正确，或切换为 Whisper 本地模型。
+- **视频上传失败**：确保 `ffmpeg` 已正确安装并可执行。
+
 ## 快速使用
 
 ```bash

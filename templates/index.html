@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DouYin2Text Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&family=Noto+Sans+SC:wght@400;500;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+  </head>
+  <body>
+    <div class="noise"></div>
+    <div class="orb orb-a"></div>
+    <div class="orb orb-b"></div>
+
+    <main class="shell">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">DouYin2Text Studio</p>
+          <h1>把链接、视频和语音识别，收进一个顺手的操作台。</h1>
+          <p class="subcopy">
+            深色操作界面、链接直贴、视频上传、结果预览、历史回看。
+          </p>
+        </div>
+        <div class="header-actions">
+          <button class="ghost-button" id="settingsToggle" type="button">️ 设置</button>
+          <button class="ghost-button" id="historyToggle" type="button">历史记录</button>
+        </div>
+      </header>
+
+      <section class="workspace">
+        <div class="panel input-panel">
+          <div class="panel-head">
+            <div>
+              <p class="panel-label">输入模式</p>
+              <h2>开始一次提取</h2>
+            </div>
+            <div class="mode-switch" id="modeSwitch">
+              <button class="mode-pill active" type="button" data-mode="url">链接 / 文案</button>
+              <button class="mode-pill" type="button" data-mode="file">上传视频</button>
+            </div>
+          </div>
+
+          <form id="extractForm">
+            <input type="hidden" name="mode" id="modeField" value="url" />
+
+            <div class="input-block" id="urlBlock">
+              <label for="urlInput">抖音链接或整段分享文案</label>
+              <textarea
+                id="urlInput"
+                name="url"
+                placeholder="直接粘贴抖音链接，或者整段分享文案。系统会自动解析里面的链接。"
+              ></textarea>
+            </div>
+
+            <div class="input-block hidden" id="fileBlock">
+              <label for="fileInput">上传本地视频</label>
+              <label class="dropzone" for="fileInput" id="dropzone">
+                <input id="fileInput" name="file" type="file" accept="video/*" />
+                <span class="dropzone-title">拖拽视频到这里，或点击选择文件</span>
+                <span class="dropzone-hint">支持 MP4 / MOV / M4V 等常见视频格式</span>
+                <span class="dropzone-file" id="fileName">尚未选择文件</span>
+              </label>
+            </div>
+
+            <div class="toolbar">
+              <label class="field-inline">
+                <span>Whisper 回退模型</span>
+                <select name="model">
+                  <option value="tiny">tiny</option>
+                  <option value="base" selected>base</option>
+                  <option value="small">small</option>
+                  <option value="medium">medium</option>
+                  <option value="large">large</option>
+                </select>
+              </label>
+
+              <div class="toolbar-actions">
+                <button class="secondary-button" id="clearButton" type="button">清空</button>
+                <button class="primary-button" id="submitButton" type="submit">
+                  开始提取
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <aside class="panel side-panel">
+          <p class="panel-label">使用建议</p>
+          <ul class="tips">
+            <li>链接模式适合直接处理抖音分享内容。</li>
+            <li>上传模式适合本地视频或二次剪辑素材。</li>
+            <li>极速版 ASR 会优先执行，失败时自动回退。</li>
+            <li>结果区保留原始文案、视频元数据和识别全文。</li>
+          </ul>
+        </aside>
+      </section>
+
+      <section class="result-shell hidden" id="resultShell">
+        <div class="panel result-panel">
+          <div class="panel-head">
+            <div>
+              <p class="panel-label">提取结果</p>
+              <h2 class="result-title" id="resultTitle">等待结果</h2>
+            </div>
+            <div class="chips" id="metaChips"></div>
+          </div>
+
+          <div class="result-grid">
+            <div class="media-card">
+              <div class="video-frame" id="videoFrame">
+                <video id="videoPlayer" controls playsinline></video>
+                <div class="media-placeholder" id="videoPlaceholder">提取完成后将在这里预览视频</div>
+              </div>
+              <div class="media-actions">
+                <a class="mini-button hidden" id="videoLink" target="_blank" rel="noreferrer">打开视频</a>
+                <a class="mini-button hidden" id="coverLink" target="_blank" rel="noreferrer">打开封面</a>
+              </div>
+            </div>
+
+            <div class="detail-stack">
+              <article class="detail-card">
+                <p class="detail-title">原始文案</p>
+                <p class="detail-text" id="rawDesc">暂无内容</p>
+              </article>
+
+              <article class="detail-card asr-card">
+                <div class="detail-card-header">
+                  <p class="detail-title">识别全文</p>
+                  <button class="copy-button" id="copyAsrButton" type="button" title="复制识别全文">复制</button>
+                </div>
+                <div class="asr-paragraphs" id="asrParagraphs"></div>
+              </article>
+
+              <article class="detail-card">
+                <p class="detail-title">元数据</p>
+                <pre class="metadata-box" id="metadataBox">{}</pre>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <aside class="history-drawer" id="historyDrawer">
+      <div class="drawer-head">
+        <div>
+          <p class="panel-label">近期记录</p>
+          <h2>操作历史</h2>
+        </div>
+        <button class="ghost-button small" id="historyClose" type="button">关闭</button>
+      </div>
+      <div class="history-list" id="historyList"></div>
+    </aside>
+
+    <aside class="settings-drawer" id="settingsDrawer">
+      <div class="drawer-head">
+        <div>
+          <p class="panel-label">配置</p>
+          <h2>系统设置</h2>
+        </div>
+        <button class="ghost-button small" id="settingsClose" type="button">关闭</button>
+      </div>
+      <form id="settingsForm" class="settings-form">
+        <div class="setting-group">
+          <label for="appIdInput">App ID</label>
+          <input type="text" id="appIdInput" name="app_id" placeholder="请输入火山引擎 App ID" />
+        </div>
+        <div class="setting-group">
+          <label for="tokenInput">Access Token</label>
+          <input type="text" id="tokenInput" name="access_token" placeholder="请输入 Access Token" />
+        </div>
+        <div class="setting-group">
+          <label for="apiKeyInput">API Key</label>
+          <input type="text" id="apiKeyInput" name="api_key" placeholder="请输入 API Key" />
+        </div>
+        <div class="setting-group">
+          <label for="uidInput">UID</label>
+          <input type="text" id="uidInput" name="uid" placeholder="用户标识（可选）" />
+        </div>
+        <div class="setting-actions">
+          <button class="secondary-button" id="resetSettingsButton" type="button">重置</button>
+          <button class="primary-button" id="saveSettingsButton" type="submit">保存配置</button>
+        </div>
+      </form>
+    </aside>
+
+    <div class="toast hidden" id="toast"></div>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+  </body>
+</html>

@@ -359,25 +359,43 @@ def parse_douyin_url(url: str) -> dict:
 
 
 def download_file(url: str, dest_path: str, label: str = "文件") -> bool:
-    """下载远程文件到本地路径（支持防盗链绕过）。"""
+    """下载远程文件到本地路径（支持防盗链绕过，增强重试和错误处理）。"""
     print(f"[下载] 正在下载{label}: {url[:80]}...")
     try:
-        req = urllib.request.Request(
-            url,
-            headers={
-                "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) "
-                              "AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
-                "Referer": "https://www.douyin.com/",
-            },
-        )
-        with urllib.request.urlopen(req, timeout=60) as resp, open(dest_path, "wb") as f:
-            while chunk := resp.read(65536):
-                f.write(chunk)
+        # 抖音视频链接需要完整的 URL，不能截断
+        headers = {
+            "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) "
+                          "AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+            "Referer": "https://www.douyin.com/",
+            "Accept": "video/mp4,video/*;q=0.9,*/*;q=0.8",
+            "Accept-Language": "zh-CN,zh;q=0.9",
+        }
+        
+        # 使用 requests 库下载，更稳定
+        resp = requests.get(url, headers=headers, timeout=120, stream=True)
+        resp.raise_for_status()
+        
+        # 检查内容类型
+        content_type = resp.headers.get('Content-Type', '')
+        if 'video' not in content_type and 'octet-stream' not in content_type:
+            print(f"[下载] 警告: 响应类型不是视频: {content_type}")
+        
+        # 流式写入文件
+        with open(dest_path, "wb") as f:
+            for chunk in resp.iter_content(chunk_size=65536):
+                if chunk:
+                    f.write(chunk)
+        
         size_mb = os.path.getsize(dest_path) / 1024 / 1024
         print(f"[下载] 完成，大小: {size_mb:.1f} MB -> {dest_path}")
         return True
+    except requests.exceptions.RequestException as e:
+        print(f"[下载] 网络请求失败: {e}")
+        return False
     except Exception as e:
         print(f"[下载] 失败: {e}")
+        import traceback
+        traceback.print_exc()
         return False
 
 
