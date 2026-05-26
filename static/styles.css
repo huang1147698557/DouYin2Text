@@ -111,13 +111,13 @@ body {
 }
 
 .hero h1 {
-  max-width: 18ch;
+  max-width: none;
   font-size: clamp(32px, 3.4vw, 52px);
   line-height: 1.15;
 }
 
 .subcopy {
-  max-width: 54ch;
+  max-width: 72ch;
   margin: 14px 0 0;
   color: var(--muted);
   line-height: 1.7;
@@ -197,12 +197,18 @@ body {
   margin-bottom: 22px;
 }
 
+.hero > :first-child,
+.result-panel .panel-head > :first-child {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 .panel-head h2 {
   font-size: clamp(20px, 1.8vw, 26px);
 }
 
 .result-title {
-  max-width: min(100%, 28ch);
+  max-width: none;
   font-family: "Noto Sans SC", sans-serif;
   font-size: clamp(18px, 1.5vw, 24px) !important;
   font-weight: 700 !important;
