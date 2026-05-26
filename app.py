@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import json
+import os
 import shutil
 import uuid
 from datetime import datetime
@@ -9,6 +10,7 @@ from flask import Flask, jsonify, render_template, request, send_from_directory,
 from werkzeug.utils import secure_filename
 
 from douyin2text import (
+    CONFIG_PATH as DOUYIN_CONFIG_PATH,
     build_paragraphs_from_lines,
     process_url,
     process_video,
@@ -17,8 +19,10 @@ from douyin2text import (
 
 
 BASE_DIR = Path(__file__).resolve().parent
-WEB_OUTPUT_DIR = BASE_DIR / "output" / "web"
-CONFIG_PATH = BASE_DIR / "config.json"
+WEB_OUTPUT_DIR = Path(
+    os.environ.get("DOUYIN2TEXT_WEB_OUTPUT_DIR", str(BASE_DIR / "output" / "web"))
+).expanduser()
+CONFIG_PATH = DOUYIN_CONFIG_PATH
 SUPPORTED_ASR_PROVIDERS = {"auto", "volcengine", "whisper"}
 WEB_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -240,4 +244,12 @@ def save_settings():
 
 
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=5088, debug=False)
+    host = os.environ.get("APP_HOST", "127.0.0.1")
+    port = int(os.environ.get("APP_PORT", "5088"))
+    debug = os.environ.get("APP_DEBUG", "false").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
+    app.run(host=host, port=port, debug=debug)

@@ -27,7 +27,10 @@ BASE_URL  = "http://16tufi081507.vicp.fun:8086"
 API_KEY   = "763b0781bd293135b391347ebb83c7a9"
 MCP_ENDPOINT = f"{BASE_URL}/mcp?key={API_KEY}"
 VOLCENGINE_FLASH_URL = "https://openspeech.bytedance.com/api/v3/auc/bigmodel/recognize/flash"
-CONFIG_PATH = Path(__file__).with_name("config.json")
+DEFAULT_CONFIG_PATH = Path(__file__).with_name("config.json")
+CONFIG_PATH = Path(
+    os.environ.get("DOUYIN2TEXT_CONFIG_PATH", str(DEFAULT_CONFIG_PATH))
+).expanduser()
 WHISPER_MODEL_CHOICES = ("tiny", "base", "small", "medium", "large")
 SUPPORTED_ASR_PROVIDERS = {"auto", "volcengine", "whisper"}
 

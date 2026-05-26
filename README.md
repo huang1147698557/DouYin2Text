@@ -84,7 +84,11 @@ pip install openai-whisper requests
    python3 app.py
    ```
 
-   服务将在本地 `127.0.0.1:5088` 启动，`debug=True` 模式下支持热重载。
+   默认会监听本地 `127.0.0.1:5088`。如需局域网访问，可这样启动：
+
+   ```bash
+   APP_HOST=0.0.0.0 APP_PORT=5088 python3 app.py
+   ```
 
 6. **打开浏览器访问**
 
@@ -96,9 +100,134 @@ pip install openai-whisper requests
 
    在启动服务的终端里按 `Ctrl + C` 即可。
 
+## Docker / NAS 部署
+
+仓库已补齐 Docker 所需文件：`Dockerfile`、`docker-compose.yml`、`.dockerignore`。
+
+### 适合 NAS 的默认建议
+
+- **优先使用火山模型**：大多数 NAS CPU 性能有限，建议把页面里的识别引擎默认切到火山模型。
+- **Whisper 作为可选能力**：如果 NAS 性能足够，构建镜像时再开启 Whisper 支持。
+- **数据持久化**：配置、历史记录、输出文件和 Whisper 缓存都挂载到宿主机目录，容器重建后不会丢。
+
+### 1. 准备持久化目录
+
+在 NAS 上创建一个目录，例如：
+
+```text
+/volume1/docker/douyin2text
+```
+
+把仓库上传到 NAS，例如：
+
+```text
+/volume1/docker/douyin2text/app
+```
+
+然后在项目目录下准备持久化数据目录：
+
+```bash
+mkdir -p docker-data
+cp config.example.json docker-data/config.json
+```
+
+### 2. 修改配置
+
+编辑：
+
+```text
+docker-data/config.json
+```
+
+至少填好火山引擎凭证。推荐：
+
+```json
+{
+  "volcengine_asr": {
+    "provider": "volcengine",
+    "app_id": "",
+    "access_token": "",
+    "api_key": "",
+    "uid": "douyin2text",
+    "resource_id": "volc.bigasr.auc_turbo",
+    "audio_format": "mp3"
+  }
+}
+```
+
+### 3. 启动容器
+
+#### 方案 A：普通 NAS，优先火山模型（推荐）
+
+不安装 Whisper，镜像更小、构建更快：
+
+```bash
+docker compose up -d --build
+```
+
+默认访问地址：
+
+```text
+http://NAS-IP:5088
+```
+
+#### 方案 B：需要本地 Whisper
+
+如果 NAS 性能足够，启动前加构建参数：
+
+```bash
+INSTALL_WHISPER=true docker compose up -d --build
+```
+
+### 4. 常用命令
+
+```bash
+# 查看日志
+docker compose logs -f
+
+# 重启
+docker compose restart
+
+# 停止
+docker compose down
+
+# 重新构建并启动
+docker compose up -d --build
+```
+
+### 5. 在群晖 / 威联通图形界面里怎么填
+
+如果你不用命令行，也可以直接在 NAS 的 Docker / Container Manager 里创建容器：
+
+| 项目 | 建议值 |
+|------|--------|
+| 镜像构建目录 | 当前项目根目录 |
+| 端口映射 | `5088:5088` |
+| 环境变量 `APP_HOST` | `0.0.0.0` |
+| 环境变量 `APP_PORT` | `5088` |
+| 环境变量 `DOUYIN2TEXT_CONFIG_PATH` | `/data/config.json` |
+| 环境变量 `DOUYIN2TEXT_WEB_OUTPUT_DIR` | `/data/output/web` |
+| 环境变量 `XDG_CACHE_HOME` | `/data/.cache` |
+| 卷映射 | NAS 宿主机目录映射到容器 `/data` |
+| 重启策略 | `unless-stopped` |
+
+### 6. 本次为了 Docker 做了哪些代码修改
+
+1. `app.py` 支持通过环境变量设置 `APP_HOST` / `APP_PORT`，容器内可直接对外监听。  
+2. `app.py` 和 `douyin2text.py` 支持通过环境变量指定配置文件和输出目录路径，方便挂载 NAS 持久化目录。  
+3. 新增 `Dockerfile`、`docker-compose.yml`、`.dockerignore`，避免把本地 `config.json` 和输出文件打进镜像。  
+
+### 7. NAS 部署注意事项
+
+- 如果你的 NAS 是 **ARM 架构**，本地 Whisper 可能安装慢、镜像更大，建议优先用火山模型。
+- 如果你的 NAS 是 **x86 架构**，开启 Whisper 成功率更高。
+- 首次开启 Whisper 时会下载模型文件，缓存会保存在挂载目录 `/data/.cache`。
+- 容器更新后，原有历史记录和输出文件都还在 `docker-data/` 里。
+
 ### 常见问题
 
 - **端口被占用**：修改 `app.py` 最后一行的 `port=5088` 为其他端口号。
+- **端口被占用**：换一个端口启动，例如 `APP_PORT=5090 python3 app.py`，或在 `docker-compose.yml` 中修改 `HOST_PORT`。
 - **ASR 识别失败**：检查 `config.json` 中火山引擎凭证是否正确，或在页面里切换为 Whisper 本地模型。
 - **视频上传失败**：确保 `ffmpeg` 已正确安装并可执行。
 
