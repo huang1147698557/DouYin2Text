@@ -515,6 +515,94 @@ select:focus,
   font-size: 13px;
 }
 
+.settings-drawer {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  width: min(460px, calc(100vw - 32px));
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 32px;
+  background: rgba(12, 16, 15, 0.95);
+  backdrop-filter: blur(22px);
+  box-shadow: var(--shadow);
+  transform: translateX(calc(100% + 40px));
+  transition: transform 0.32s ease;
+  z-index: 11;
+}
+
+.settings-drawer.open {
+  transform: translateX(0);
+}
+
+.settings-form {
+  display: grid;
+  gap: 14px;
+}
+
+.setting-group {
+  display: grid;
+  gap: 8px;
+}
+
+.setting-group label {
+  color: #dbe4de;
+  font-size: 14px;
+}
+
+.setting-group input {
+  width: 100%;
+  border: 1px solid rgba(184, 212, 194, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  border-radius: 14px;
+  padding: 12px 14px;
+  font: inherit;
+  outline: none;
+}
+
+.setting-group input:focus {
+  border-color: rgba(67, 208, 136, 0.52);
+  box-shadow: 0 0 0 4px rgba(67, 208, 136, 0.12);
+}
+
+.setting-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.detail-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.copy-button {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #dbe4de;
+  font-size: 13px;
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.copy-button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(67, 208, 136, 0.4);
+  background: rgba(67, 208, 136, 0.12);
+}
+
+.copy-button.copied {
+  border-color: rgba(67, 208, 136, 0.6);
+  background: rgba(67, 208, 136, 0.2);
+  color: #eaffef;
+}
+
 .toast {
   position: fixed;
   left: 50%;
@@ -567,16 +655,13 @@ select:focus,
   .primary-button {
     flex: 1;
   }
-}
-: stretch;
-  }
 
-  .toolbar-actions {
-    width: 100%;
-  }
-
-  .secondary-button,
-  .primary-button {
-    flex: 1;
+  .history-drawer,
+  .settings-drawer {
+    top: 12px;
+    right: 12px;
+    width: calc(100vw - 24px);
+    max-height: calc(100vh - 24px);
+    border-radius: 24px;
   }
 }

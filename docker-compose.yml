@@ -14,5 +14,6 @@ services:
       DOUYIN2TEXT_CONFIG_PATH: /data/config.json
       DOUYIN2TEXT_WEB_OUTPUT_DIR: /data/output/web
       XDG_CACHE_HOME: /data/.cache
+      ARK_API_KEY: ${ARK_API_KEY:-}
     volumes:
       - ./docker-data:/data
