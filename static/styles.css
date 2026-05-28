@@ -84,6 +84,13 @@ body {
   margin-bottom: 28px;
 }
 
+.header-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 .eyebrow,
 .panel-label {
   margin: 0 0 10px;
@@ -120,10 +127,14 @@ body {
 .secondary-button,
 .primary-button,
 .mini-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 1px solid var(--line);
   border-radius: 999px;
   font: inherit;
   color: var(--text);
+  text-decoration: none;
   cursor: pointer;
   transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
 }

@@ -1,4 +1,4 @@
-FROM python:3.10-slim
+FROM docker.m.daocloud.io/library/python:3.10-slim
 
 ARG INSTALL_WHISPER=false
 
@@ -17,10 +17,10 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends ffmpeg ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-RUN python -m pip install --upgrade pip
+RUN python -m pip install --upgrade pip -i https://pypi.tuna.tsinghua.edu.cn/simple
 
-RUN python -m pip install flask requests \
-    && if [ "$INSTALL_WHISPER" = "true" ]; then python -m pip install openai-whisper; fi
+RUN python -m pip install flask requests -i https://pypi.tuna.tsinghua.edu.cn/simple \
+    && if [ "$INSTALL_WHISPER" = "true" ]; then python -m pip install openai-whisper -i https://pypi.tuna.tsinghua.edu.cn/simple; fi
 
 COPY . /app
 

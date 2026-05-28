@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LiteArt 卡片工坊</title>
+<title>理想L9 LeVIS：800V主动悬架与全线控底盘</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -26,41 +26,21 @@ body{font-family:-apple-system,'PingFang SC','Noto Sans SC','Microsoft YaHei',sa
 .sidebar textarea:focus{outline:none;border-color:var(--gold);}
 .btn{border:none;padding:13px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;transition:opacity .2s,transform .1s;letter-spacing:0.3px;}
 .btn:hover{opacity:.85;}.btn:active{transform:scale(.98);}
-.btn[disabled]{opacity:.55;cursor:not-allowed;transform:none;}
 .btn-primary{background:var(--gold);color:#1a0a00;}
-.btn-secondary{background:#243127;color:#f3e8d5;border:1px solid #38493b;}
 .btn-ghost{background:transparent;border:1px solid #333;color:#888;font-size:13px;font-weight:600;padding:10px;}
 .btn-ghost:hover{border-color:#555;color:#bbb;}
 .fc-section{display:flex;flex-direction:column;gap:8px;}
 .fc-label{font-size:11px;color:#444;letter-spacing:1.2px;text-transform:uppercase;font-weight:600;}
 .fc-row{display:flex;align-items:center;gap:8px;}
 .fc-row span.name{font-size:12px;color:#666;width:42px;flex-shrink:0;}
-.fc-row input[type=range]{flex:1;appearance:none;-webkit-appearance:none;height:3px;background:#2a2a2a;border-radius:2px;cursor:pointer;}
+.fc-row input[type=range]{flex:1;-webkit-appearance:none;height:3px;background:#2a2a2a;border-radius:2px;cursor:pointer;}
 .fc-row input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--gold);cursor:pointer;}
 .fc-row .fv{font-size:11px;color:#555;width:22px;text-align:right;flex-shrink:0;}
-.status-line{min-height:20px;font-size:12px;line-height:1.6;color:#7d7468;}
-.status-line.success{color:#d8c59a;}
-.status-line.error{color:#e19d8b;}
 .divider-line{border:none;border-top:1px solid #222;margin:2px 0;}
 .main{flex:1;padding:32px;overflow-y:auto;}
-.main-header{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;margin-bottom:20px;}
+.main-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;}
 .main-header h2{font-size:12px;color:#444;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;}
 .main-header .edit-tip{font-size:11px;color:#333;}
-.header-copy{display:flex;flex-direction:column;gap:6px;}
-.header-tools{position:relative;display:flex;flex-direction:column;align-items:flex-end;gap:10px;}
-.header-tools-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end;}
-.header-tools .btn{padding:10px 14px;font-size:12px;}
-.header-link{text-decoration:none;display:inline-flex;align-items:center;justify-content:center;}
-.model-chip{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;border:1px solid rgba(201,169,110,.24);background:rgba(201,169,110,.12);color:#d4c2a2;font-size:11px;letter-spacing:0.2px;}
-.llm-panel{position:absolute;top:calc(100% + 10px);right:0;z-index:30;width:min(320px,calc(100vw - 80px));display:none;flex-direction:column;gap:12px;padding:16px;border:1px solid #2f2920;border-radius:16px;background:rgba(17,14,11,.96);box-shadow:0 22px 48px rgba(0,0,0,.34);backdrop-filter:blur(12px);}
-.llm-panel.open{display:flex;}
-.llm-panel h3{font-size:13px;color:#f0e2c7;font-weight:700;letter-spacing:0.2px;}
-.llm-panel p{font-size:11px;color:#736858;line-height:1.6;}
-.llm-field{display:flex;flex-direction:column;gap:7px;}
-.llm-field span{font-size:11px;color:#8e816f;letter-spacing:0.5px;text-transform:uppercase;}
-.llm-field select,.llm-field input{width:100%;background:#100d09;border:1px solid #2b261f;border-radius:10px;color:#ebdcc0;padding:11px 12px;font-size:13px;outline:none;}
-.llm-field select:focus,.llm-field input:focus{border-color:rgba(201,169,110,.65);box-shadow:0 0 0 3px rgba(201,169,110,.12);}
-.llm-actions{display:flex;justify-content:flex-end;gap:10px;}
 .dual-columns{display:flex;gap:48px;justify-content:center;}
 .theme-column{display:flex;flex-direction:column;gap:28px;}
 .column-header{display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;border-bottom:1px solid #222;}
@@ -79,7 +59,7 @@ body{font-family:-apple-system,'PingFang SC','Noto Sans SC','Microsoft YaHei',sa
 .page{width:375px;height:500px;position:relative;overflow:hidden;flex-shrink:0;}
 [data-editable]{cursor:default;}
 [data-editable]:hover{outline:1.5px dashed rgba(201,169,110,.4);outline-offset:2px;border-radius:3px;}
-[data-editable][contenteditable=true]{outline:1.5px solid var(--gold)!important;outline-offset:2px;border-radius:3px;cursor:text;overflow:visible!important;line-clamp:unset!important;-webkit-line-clamp:unset!important;}
+[data-editable][contenteditable=true]{outline:1.5px solid var(--gold)!important;outline-offset:2px;border-radius:3px;cursor:text;overflow:visible!important;-webkit-line-clamp:unset!important;}
 .img-zone{background-size:cover;background-position:50% 50%;background-repeat:no-repeat;position:relative;overflow:hidden;}
 .cover-photo{overflow:clip;}
 .img-zone:not([data-has-bg]){cursor:pointer;}
@@ -91,7 +71,7 @@ body{font-family:-apple-system,'PingFang SC','Noto Sans SC','Microsoft YaHei',sa
 .img-controls{position:absolute;bottom:0;left:0;right:0;z-index:200;display:flex;align-items:center;gap:8px;padding:7px 12px;background:linear-gradient(transparent,rgba(0,0,0,.75));opacity:0;transition:opacity .2s;pointer-events:none;}
 .img-zone[data-has-bg]:hover .img-controls{opacity:1;pointer-events:auto;}
 .img-controls .zoom-label{font-size:10px;color:rgba(255,255,255,.7);flex-shrink:0;letter-spacing:0.3px;}
-.img-controls input[type=range]{flex:1;appearance:none;-webkit-appearance:none;height:3px;background:rgba(255,255,255,.25);border-radius:2px;cursor:pointer;min-width:60px;}
+.img-controls input[type=range]{flex:1;-webkit-appearance:none;height:3px;background:rgba(255,255,255,.25);border-radius:2px;cursor:pointer;min-width:60px;}
 .img-controls input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:#fff;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.4);}
 .img-controls .zoom-val{font-size:10px;color:rgba(255,255,255,.7);width:30px;text-align:right;flex-shrink:0;}
 .img-controls .ctrl-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:10px;padding:3px 8px;border-radius:12px;cursor:pointer;flex-shrink:0;transition:background .15s;letter-spacing:0.2px;}
@@ -127,18 +107,16 @@ body{font-family:-apple-system,'PingFang SC','Noto Sans SC','Microsoft YaHei',sa
 .cover-title{font-size:var(--fs-title);font-weight:900;color:#fff;line-height:1.3;letter-spacing:-0.5px;margin-bottom:5px;}
 .cover-title .g{color:var(--gold);}
 .cover-lp .cover-title{color:#1a1208;}
-.cover-sub{font-size:var(--fs-sub);color:#8f816c;line-height:1.55;margin-top:2px;margin-bottom:8px;}
+.cover-sub{font-size:var(--fs-sub);color:#555;line-height:1.6;margin-top:2px;}
 .cover-lp .cover-sub{color:#8a7f6e;}
-.cover-body{font-size:var(--fs-body);color:#6b6258;line-height:1.78;display:-webkit-box;line-clamp:4;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;}
-.cover-lp .cover-body{color:#736858;}
 .page.dp{background:var(--dark-bg);display:flex;flex-direction:column;}
 .dp .cat{position:absolute;top:15px;left:15px;font-size:10.5px;color:var(--gold);font-weight:600;letter-spacing:0.5px;z-index:2;}
 .dp .dp-content{padding:38px 16px 0;flex-shrink:0;}
 .dp .badge{display:inline-flex;align-items:center;background:var(--gold);color:#1a0800;border-radius:5px;padding:2px 10px 3px;font-size:11px;font-weight:800;margin-bottom:7px;letter-spacing:0.2px;}
-.dp .ftitle{font-size:var(--fs-title);font-weight:900;color:#fff;line-height:1.25;margin-bottom:5px;display:-webkit-box;line-clamp:2;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-.dp .fsub{font-size:var(--fs-sub);font-weight:600;color:#ddd0bb;line-height:1.55;margin-bottom:10px;display:-webkit-box;line-clamp:2;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.dp .ftitle{font-size:var(--fs-title);font-weight:900;color:#fff;line-height:1.25;margin-bottom:5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.dp .fsub{font-size:var(--fs-sub);font-weight:600;color:#ddd0bb;line-height:1.55;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
 .dp .dbox{background:var(--dark-box);border-radius:9px;padding:11px 13px;}
-.dp .dbox p{font-size:var(--fs-body);color:#b0997e;line-height:1.78;display:-webkit-box;line-clamp:4;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;}
+.dp .dbox p{font-size:var(--fs-body);color:#b0997e;line-height:1.78;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;}
 .dp .imgzone{margin:10px 10px 10px;border-radius:10px;overflow:hidden;position:relative;height:280px;overflow-y:clip;}
 .dp .imgzone .imgph{background:#201910;}
 .dp .imgzone .imgph .icon{font-size:26px;opacity:.35;}
@@ -149,23 +127,22 @@ body{font-family:-apple-system,'PingFang SC','Noto Sans SC','Microsoft YaHei',sa
 .lp .card-top{padding:15px 15px 0;flex-shrink:0;}
 .lp .badge-row{display:flex;align-items:center;gap:7px;margin-bottom:5px;flex-wrap:nowrap;}
 .lp .badge{display:inline-flex;align-items:center;background:var(--gold);color:#1a0800;border-radius:5px;padding:2px 9px 3px;font-size:11px;font-weight:800;white-space:nowrap;flex-shrink:0;letter-spacing:0.2px;}
-.lp .ftitle{font-size:calc(var(--fs-title) - 6px);font-weight:900;color:#111;line-height:1.25;display:-webkit-box;line-clamp:2;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-.lp .fsub{font-size:var(--fs-sub);font-weight:600;color:#333;line-height:1.55;margin:5px 0 7px;display:-webkit-box;line-clamp:2;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.lp .ftitle{font-size:calc(var(--fs-title) - 6px);font-weight:900;color:#111;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.lp .fsub{font-size:var(--fs-sub);font-weight:600;color:#333;line-height:1.55;margin:5px 0 7px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
 .lp .divider{border:none;border-top:1.5px dashed #d0c8be;margin:4px 0 8px;}
-.lp .dtext{font-size:var(--fs-body);color:#555;line-height:1.78;display:-webkit-box;line-clamp:3;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+.lp .dtext{font-size:var(--fs-body);color:#555;line-height:1.78;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
 .lp .card-img{margin:8px 10px 10px;border-radius:10px;overflow:hidden;position:relative;background:#e8dcd0;height:230px;overflow-y:clip;}
 .lp .card-img .imgph .icon{font-size:26px;opacity:.3;}
 .lp .card-img .imgph span{font-size:11px;color:#aaa;}
 .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:400px;color:#333;gap:12px;width:100%;}
 .empty-state .big{font-size:40px;}
 .empty-state p{font-size:13px;line-height:1.7;text-align:center;max-width:300px;}
-@media (max-width:1080px){body{flex-direction:column;}.sidebar{width:100%;min-width:0;height:auto;position:relative;border-right:none;border-bottom:1px solid #242424;}.main{padding:24px 18px 40px;}.main-header{flex-direction:column;align-items:stretch;}.header-tools{align-items:stretch;}.header-tools-row{justify-content:flex-start;}.llm-panel{position:relative;top:auto;right:auto;width:100%;}}
 </style>
 </head>
 <body>
 <aside class="sidebar">
   <div class="sidebar-logo"><div class="dot"></div><span>LiteArt</span></div>
-  <p class="hint">输入主题、文章或段落，可先生成固定格式文案，再生成浅色 + 深色两套卡片，每套 1 封面 + 5 页内容。</p>
+  <p class="hint">输入主题、文章或段落，自动生成浅色 + 深色两套卡片，每套 1 封面 + 5 页内容。</p>
   <textarea id="inputText" placeholder="在此输入内容...">800V主动悬架 全线控底盘 L4的起点
 理想L9 LeVIS底盘技术深度解读
 为什么一定要上800V主动悬架？为什么要做完全体线控底盘？这套系统对L4自动驾驶究竟意味着什么？李想与产品线总裁唐静，聊透理想对底盘和悬架的底层思考。
@@ -189,9 +166,7 @@ body{font-family:-apple-system,'PingFang SC','Noto Sans SC','Microsoft YaHei',sa
 通往L4的起点
 控制系统必须比人快50%
 2028至2033年是攻克L4的关键五年。端到端模型直接输出控制指令，但车辆控制系统本身必须升级——响应速度要比人快50%才有安全保障。800V主动悬架和全线控底盘，正是实现这一目标的硬件基础。不买主动悬架和全线控底盘，开过之后你一定后悔。</textarea>
-  <button class="btn btn-secondary" id="generateCopyBtn" onclick="generateCopy()">生 成 文 案</button>
-  <button class="btn btn-primary" id="generateCardBtn" onclick="generate()">生 成 卡 片</button>
-  <div class="status-line" id="statusLine">支持先让模型生成固定格式文案，再基于文案渲染卡片。</div>
+  <button class="btn btn-primary" onclick="generate()">生 成 卡 片</button>
   <hr class="divider-line">
   <div class="fc-section">
     <div class="fc-label">字号调节</div>
@@ -218,32 +193,8 @@ body{font-family:-apple-system,'PingFang SC','Noto Sans SC','Microsoft YaHei',sa
 
 <main class="main">
   <div class="main-header">
-    <div class="header-copy">
-      <h2>浅色 6 页 + 深色 6 页 · 共 12 页</h2>
-      <span class="edit-tip">双击文字可编辑 · 点击图片区域上传</span>
-    </div>
-    <div class="header-tools" id="llmPanelWrap">
-      <div class="header-tools-row">
-        <span class="model-chip" id="activeModelLabel">当前模型：加载中</span>
-        <button class="btn btn-ghost" id="toggleLlmSettings" type="button">模型配置</button>
-        <a class="btn btn-ghost header-link" href="/">返回首页</a>
-      </div>
-      <div class="llm-panel" id="llmSettingsPanel">
-        <h3>大模型配置</h3>
-        <p>支持在 DeepSeek V4 Pro 和 Doubao Seed 2.0 Pro 之间切换。配置只影响当前 LiteArt 文案生成。</p>
-        <label class="llm-field">
-          <span>模型</span>
-          <select id="llmModelSelect"></select>
-        </label>
-        <label class="llm-field">
-          <span>API Key</span>
-          <input id="llmApiKeyInput" type="password" placeholder="输入 ARK API Key" autocomplete="off">
-        </label>
-        <div class="llm-actions">
-          <button class="btn btn-ghost" id="saveLlmSettingsBtn" type="button">保存配置</button>
-        </div>
-      </div>
-    </div>
+    <h2>浅色 6 页 + 深色 6 页 · 共 12 页</h2>
+    <span class="edit-tip">双击文字可编辑 · 点击图片区域上传</span>
   </div>
   <div class="dual-columns" id="dualColumns">
     <div class="empty-state">
@@ -256,120 +207,8 @@ body{font-family:-apple-system,'PingFang SC','Noto Sans SC','Microsoft YaHei',sa
 <div id="file-inputs" style="display:none"></div>
 
 <script>
-const BADGES = ['核心观点','深度解析','关键数据','行动建议','风险提示'];
-const CATEGORIES = ['趋势研判','行业洞察','核心观点','实战指南','风险提示'];
-const inputText = document.getElementById('inputText');
-const statusLine = document.getElementById('statusLine');
-const llmPanelWrap = document.getElementById('llmPanelWrap');
-const llmSettingsPanel = document.getElementById('llmSettingsPanel');
-const toggleLlmSettingsBtn = document.getElementById('toggleLlmSettings');
-const saveLlmSettingsBtn = document.getElementById('saveLlmSettingsBtn');
-const llmModelSelect = document.getElementById('llmModelSelect');
-const llmApiKeyInput = document.getElementById('llmApiKeyInput');
-const activeModelLabel = document.getElementById('activeModelLabel');
-const generateCopyBtn = document.getElementById('generateCopyBtn');
-
-let llmSettings = {active_model:'',api_key:'',models:[]};
-
-function showStatus(message, tone='muted') {
-  statusLine.textContent = message;
-  statusLine.className = tone === 'muted' ? 'status-line' : `status-line ${tone}`;
-}
-
-async function requestJSON(url, options) {
-  const response = await fetch(url, options);
-  let payload = null;
-  try {
-    payload = await response.json();
-  } catch (err) {
-    payload = null;
-  }
-  if (!response.ok) {
-    throw new Error(payload?.error || '请求失败');
-  }
-  return payload;
-}
-
-function renderLlmSettings() {
-  llmModelSelect.innerHTML = (llmSettings.models || []).map(model => (
-    `<option value="${model.id}">${escapeHtml(model.label)}</option>`
-  )).join('');
-
-  if (llmSettings.active_model) llmModelSelect.value = llmSettings.active_model;
-  llmApiKeyInput.value = llmSettings.api_key || '';
-
-  const active = (llmSettings.models || []).find(model => model.id === llmSettings.active_model);
-  activeModelLabel.textContent = active ? `当前模型：${active.label}` : '当前模型：未配置';
-}
-
-async function loadLlmSettings() {
-  try {
-    llmSettings = await requestJSON('/api/liteart/settings');
-    renderLlmSettings();
-  } catch (err) {
-    showStatus(err.message || '模型配置加载失败。','error');
-  }
-}
-
-async function saveLlmSettings() {
-  saveLlmSettingsBtn.disabled = true;
-  try {
-    const payload = await requestJSON('/api/liteart/settings', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        active_model: llmModelSelect.value,
-        api_key: llmApiKeyInput.value.trim()
-      })
-    });
-    llmSettings = payload.settings || llmSettings;
-    renderLlmSettings();
-    llmSettingsPanel.classList.remove('open');
-    showStatus('模型配置已保存。','success');
-  } catch (err) {
-    showStatus(err.message || '模型配置保存失败。','error');
-  } finally {
-    saveLlmSettingsBtn.disabled = false;
-  }
-}
-
-async function generateCopy() {
-  const source = inputText.value.trim();
-  if (!source) {
-    inputText.focus();
-    showStatus('请先输入主题、文章或段落。','error');
-    return;
-  }
-
-  generateCopyBtn.disabled = true;
-  const originalText = generateCopyBtn.textContent;
-  generateCopyBtn.textContent = '生 成 中...';
-  showStatus('正在请求模型生成固定格式文案...');
-
-  try {
-    const payload = await requestJSON('/api/liteart/generate-copy', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        source_text: source,
-        active_model: llmModelSelect.value,
-        api_key: llmApiKeyInput.value.trim()
-      })
-    });
-    inputText.value = payload.generated_text || '';
-    llmSettings.active_model = payload.active_model || llmSettings.active_model;
-    llmSettings.api_key = llmApiKeyInput.value.trim() || llmSettings.api_key;
-    renderLlmSettings();
-    inputText.focus();
-    inputText.scrollTop = 0;
-    showStatus('固定格式文案已生成，继续点击“生成卡片”即可渲染。','success');
-  } catch (err) {
-    showStatus(err.message || '生成文案失败。','error');
-  } finally {
-    generateCopyBtn.disabled = false;
-    generateCopyBtn.textContent = originalText;
-  }
-}
+const BADGES = ['核心观点','深度解析','关键数据','实战经验','总结回顾'];
+const CATEGORIES = ['深度解析','行业洞察','核心观点','实战指南','趋势研判'];
 
 function setFontSize(type, val) {
   const n = parseInt(val);
@@ -381,82 +220,11 @@ function setFontSize(type, val) {
 function parseInput(raw) {
   const text = raw.trim();
   if (!text) return demoContent();
-  const structured = parseStructuredInput(text);
-  if (structured) return structured;
   let parts = text.split(/\n{2,}/).map(p=>p.trim()).filter(Boolean);
   if (parts.length < 2) parts = text.split(/\n/).map(p=>p.trim()).filter(Boolean);
   if (parts.length < 2) parts = text.match(/[^\u3002\uff01\uff1f\n\.!?]+[\u3002\uff01\uff1f\n\.!?]*/g)?.map(s=>s.trim()).filter(Boolean)||[text];
   const sections = distributeInto(parts, 6);
   return sections.map((sec,i)=>extractSection(sec,i));
-}
-
-function parseStructuredInput(text) {
-  const matches = [...text.matchAll(/^\[(封面|第\d+页)\]\s*$/gm)];
-  if (!matches.length) return null;
-
-  const sections = matches.map((match, index) => {
-    const blockStart = match.index + match[0].length;
-    const blockEnd = index < matches.length - 1 ? matches[index + 1].index : text.length;
-    const block = text.slice(blockStart, blockEnd).trim();
-    return extractStructuredSection(block, index);
-  });
-
-  return normalizeSections(sections);
-}
-
-function extractStructuredSection(block, idx) {
-  const fields = parseLabeledFields(block);
-  const title = cleanTitle(fields.title || '精选内容');
-  return {
-    title,
-    tag: idx === 0 ? (fields.tag || autoTag(title)) : '',
-    category: idx === 0 ? '' : (fields.category || autoCategory(idx, title)),
-    badge: idx === 0 ? '' : (fields.badge || autoBadge(idx, title)),
-    sub: fields.sub || autoSub(title),
-    body: cleanBody(fields.body || title),
-  };
-}
-
-function parseLabeledFields(block) {
-  const fieldMap = {标题:'title',标签:'tag',分类:'category',徽标:'badge',副标题:'sub',正文:'body'};
-  const fields = {};
-  let currentKey = '';
-  block.split(/\n+/).map(line => line.trim()).filter(Boolean).forEach(line => {
-    const match = line.match(/^(标题|标签|分类|徽标|副标题|正文)[：:](.*)$/);
-    if (match) {
-      currentKey = fieldMap[match[1]];
-      fields[currentKey] = match[2].trim();
-      return;
-    }
-    if (currentKey) fields[currentKey] = `${fields[currentKey] || ''} ${line}`.trim();
-  });
-  return fields;
-}
-
-function normalizeSections(sections) {
-  const normalized = sections.slice(0, 6).map((section, idx) => ({
-    title: cleanTitle(section.title || '精选内容'),
-    tag: idx === 0 ? (section.tag || autoTag(section.title)) : '',
-    category: idx === 0 ? '' : (section.category || autoCategory(idx, section.title)),
-    badge: idx === 0 ? '' : (section.badge || autoBadge(idx, section.title)),
-    sub: section.sub || autoSub(section.title || ''),
-    body: cleanBody(section.body || section.title || '精选内容'),
-  }));
-
-  while (normalized.length < 6) {
-    const idx = normalized.length;
-    const seed = normalized[idx - 1] || extractSection('精选内容\n深度洞察 · 前沿趋势\n补充一段内容。', idx);
-    normalized.push({
-      title: cleanTitle(seed.title || '精选内容'),
-      tag: idx === 0 ? (seed.tag || autoTag(seed.title)) : '',
-      category: idx === 0 ? '' : autoCategory(idx, seed.title),
-      badge: idx === 0 ? '' : autoBadge(idx, seed.title),
-      sub: seed.sub || autoSub(seed.title),
-      body: cleanBody(seed.body || seed.title || '精选内容'),
-    });
-  }
-
-  return normalized;
 }
 
 function distributeInto(parts, n) {
@@ -470,42 +238,11 @@ function extractSection(text, idx) {
   const lines = text.split(/\n/).map(l=>l.trim()).filter(Boolean);
   const title = cleanTitle(lines[0]||'精选内容');
   const sub   = lines[1]||autoSub(title);
-  const body  = cleanBody(lines.slice(2).join(' ')||lines.slice(1).join(' ')||title);
-  return {
-    title,
-    tag: idx===0?autoTag(title):'',
-    category: idx===0?'':autoCategory(idx,title),
-    badge: idx===0?'':autoBadge(idx,title),
-    sub,
-    body
-  };
+  const body  = lines.slice(2).join(' ')||lines.slice(1).join(' ')||title;
+  return {title,sub,body};
 }
 
-function cleanTitle(t){return String(t||'').replace(/^[#\-\*\d\.\s]+/,'').trim().slice(0,20);}
-
-function cleanBody(t){return String(t||'').replace(/\s+/g,' ').trim();}
-
-function autoTag(title){
-  const rules=[['风险','风险提示'],['数据','关键数据'],['AI','趋势观察'],['趋势','趋势观察'],['实践','实战指南'],['实战','实战指南']];
-  for(const [keyword,label] of rules)if(title.includes(keyword))return label;
-  return '趋势观察';
-}
-
-function autoCategory(idx,title){
-  if(title.includes('风险'))return '风险提示';
-  if(title.includes('数据'))return '行业洞察';
-  if(title.includes('协作')||title.includes('方法')||title.includes('实践'))return '实战指南';
-  if(title.includes('趋势')||title.includes('未来'))return '趋势研判';
-  return CATEGORIES[(Math.max(idx-1,0))%CATEGORIES.length];
-}
-
-function autoBadge(idx,title){
-  if(title.includes('风险'))return '风险提示';
-  if(title.includes('数据'))return '关键数据';
-  if(title.includes('方法')||title.includes('建议')||title.includes('协作'))return '行动建议';
-  if(title.includes('为什么')||title.includes('核心'))return '核心观点';
-  return BADGES[(Math.max(idx-1,0))%BADGES.length];
-}
+function cleanTitle(t){return t.replace(/^[#\-\*\d\.\s]+/,'').trim().slice(0,20);}
 
 function autoSub(title){
   const map={'AI':'人工智能重塑未来','数据':'数据驱动决策','增长':'持续增长策略','创新':'创新引领变革','管理':'高效管理之道','产品':'产品思维进化','营销':'精准营销方法','用户':'用户价值为先'};
@@ -533,12 +270,11 @@ AI 正以前所未有的速度渗透各行各业，从医疗诊断到自动驾�
 }
 
 function generate(){
-  const raw=inputText.value;
+  const raw=document.getElementById('inputText').value;
   const data=parseInput(raw);
   const container=document.getElementById('dualColumns');
   container.innerHTML='';
   document.getElementById('file-inputs').innerHTML='';
-  showStatus('卡片已刷新，可继续编辑文字或上传图片。','success');
 
   /* Build light column */
   const lightCol=document.createElement('div');lightCol.className='theme-column';
@@ -619,24 +355,23 @@ function coverHTML(sec,idx,theme){
   </div>
   <div class="resize-handle ${rhClass}" data-resize="cover" data-page-id="page-${theme}-${idx}"></div>
   <div class="cover-text">
-    <div class="cover-tag" data-editable>${escapeHtml(sec.tag||'趋势观察')}</div>
+    <div class="cover-tag" data-editable>${sec.sub||'深度解析'}</div>
     <div class="cover-title" data-editable><span class="g">${g}</span>${w}</div>
-    <div class="cover-sub" data-editable>${escapeHtml(sec.sub||'深度解析')}</div>
-    <div class="cover-body" data-editable data-clamp="4">${escapeHtml(sec.body||'')}</div>
+    <div class="cover-sub" data-editable>${sec.body.slice(0,60)}</div>
   </div>`;
 }
 
 function darkHTML(sec,idx){
-  const badge=escapeHtml(sec.badge||autoBadge(idx,sec.title));
-  const cat=escapeHtml(sec.category||autoCategory(idx,sec.title));
+  const badge=BADGES[(idx-1)%BADGES.length];
+  const cat=CATEGORIES[(idx-1)%CATEGORIES.length];
   const photoId=`photo-dark-${idx}`;
   const phId=`ph-dark-${idx}`;
   return `<div class="cat" data-editable>${cat}</div>
   <div class="dp-content">
     <div class="badge" data-editable>${badge}</div>
-    <div class="ftitle" data-editable>${escapeHtml(sec.title)}</div>
-    <div class="fsub" data-editable>${escapeHtml(sec.sub)}</div>
-    <div class="dbox"><p data-editable data-clamp="4">${escapeHtml(sec.body)}</p></div>
+    <div class="ftitle" data-editable>${sec.title}</div>
+    <div class="fsub" data-editable>${sec.sub}</div>
+    <div class="dbox"><p data-editable data-clamp="4">${sec.body}</p></div>
   </div>
   <div class="move-handle mh-dark" data-move="dp" data-page-id="page-dark-${idx}"></div>
   <div class="imgzone img-zone" id="${photoId}">
@@ -650,8 +385,8 @@ function darkHTML(sec,idx){
 }
 
 function lightHTML(sec,idx){
-  const badge=escapeHtml(sec.badge||autoBadge(idx,sec.title));
-  const cat=escapeHtml(sec.category||autoCategory(idx,sec.title));
+  const badge=BADGES[(idx-1)%BADGES.length];
+  const cat=CATEGORIES[(idx-1)%CATEGORIES.length];
   const photoId=`photo-light-${idx}`;
   const phId=`ph-light-${idx}`;
   return `<div class="cat" data-editable>${cat}</div>
@@ -659,11 +394,11 @@ function lightHTML(sec,idx){
     <div class="card-top">
       <div class="badge-row">
         <span class="badge" data-editable>${badge}</span>
-        <span class="ftitle" data-editable>${escapeHtml(sec.title)}</span>
+        <span class="ftitle" data-editable>${sec.title}</span>
       </div>
-      <div class="fsub" data-editable>${escapeHtml(sec.sub)}</div>
+      <div class="fsub" data-editable>${sec.sub}</div>
       <hr class="divider">
-      <p class="dtext" data-editable data-clamp="3">${escapeHtml(sec.body)}</p>
+      <p class="dtext" data-editable data-clamp="3">${sec.body}</p>
     </div>
     <div class="move-handle mh-light" data-move="lp" data-page-id="page-light-${idx}"></div>
     <div class="card-img img-zone" id="${photoId}">
@@ -679,19 +414,9 @@ function lightHTML(sec,idx){
 
 function splitGold(title){
   const si=title.indexOf(' ');
-  if(si>0&&si<title.length-1)return[escapeHtml(title.slice(0,si)),'<br>'+escapeHtml(title.slice(si+1))];
+  if(si>0&&si<title.length-1)return[title.slice(0,si),'<br>'+title.slice(si+1)];
   const mid=Math.max(2,Math.ceil(title.length*.45));
-  return[escapeHtml(title.slice(0,mid)),title.slice(mid)?'<br>'+escapeHtml(title.slice(mid)):'' ];
-}
-
-function escapeHtml(value){
-  return String(value||'').replace(/[&<>"']/g,ch=>({
-    '&':'&amp;',
-    '<':'&lt;',
-    '>':'&gt;',
-    '"':'&quot;',
-    "'":'&#39;'
-  }[ch]));
+  return[title.slice(0,mid),title.slice(mid)?'<br>'+title.slice(mid):''];
 }
 
 function bindUpload(key){
@@ -1012,20 +737,7 @@ async function downloadAll(theme){
   }
 }
 
-toggleLlmSettingsBtn.addEventListener('click',()=>{
-  llmSettingsPanel.classList.toggle('open');
-});
-
-saveLlmSettingsBtn.addEventListener('click',saveLlmSettings);
-
-document.addEventListener('click',(e)=>{
-  if(!llmPanelWrap.contains(e.target))llmSettingsPanel.classList.remove('open');
-});
-
-window.addEventListener('load',async()=>{
-  await loadLlmSettings();
-  generate();
-});
+window.addEventListener('load',generate);
 </script>
 </body>
 </html>
