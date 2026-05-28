@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>理想L9 LeVIS：800V主动悬架与全线控底盘</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --gold:#c9a96e;
+  --dark-bg:#1c1610;
+  --dark-box:#2a2318;
+  --light-card:#f5ede0;
+  --black:#0a0a0a;
+  --fs-title:27px;
+  --fs-sub:12.5px;
+  --fs-body:11.5px;
+}
+body{font-family:-apple-system,'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif;background:#111;color:#fff;min-height:100vh;display:flex;}
+.sidebar{width:290px;min-width:290px;background:#161616;border-right:1px solid #242424;display:flex;flex-direction:column;padding:28px 20px;gap:14px;height:100vh;position:sticky;top:0;overflow-y:auto;}
+.sidebar-logo{display:flex;align-items:center;gap:8px;color:var(--gold);font-size:16px;font-weight:800;letter-spacing:-0.3px;}
+.sidebar-logo .dot{width:8px;height:8px;background:var(--gold);border-radius:50%;}
+.sidebar p.hint{font-size:12px;color:#555;line-height:1.7;}
+.sidebar textarea{flex:1;min-height:200px;background:#0d0d0d;border:1px solid #2a2a2a;border-radius:10px;color:#ddd;padding:14px;font-size:13px;line-height:1.75;resize:none;font-family:inherit;transition:border-color .2s;}
+.sidebar textarea:focus{outline:none;border-color:var(--gold);}
+.btn{border:none;padding:13px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;transition:opacity .2s,transform .1s;letter-spacing:0.3px;}
+.btn:hover{opacity:.85;}.btn:active{transform:scale(.98);}
+.btn-primary{background:var(--gold);color:#1a0a00;}
+.btn-ghost{background:transparent;border:1px solid #333;color:#888;font-size:13px;font-weight:600;padding:10px;}
+.btn-ghost:hover{border-color:#555;color:#bbb;}
+.fc-section{display:flex;flex-direction:column;gap:8px;}
+.fc-label{font-size:11px;color:#444;letter-spacing:1.2px;text-transform:uppercase;font-weight:600;}
+.fc-row{display:flex;align-items:center;gap:8px;}
+.fc-row span.name{font-size:12px;color:#666;width:42px;flex-shrink:0;}
+.fc-row input[type=range]{flex:1;-webkit-appearance:none;height:3px;background:#2a2a2a;border-radius:2px;cursor:pointer;}
+.fc-row input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--gold);cursor:pointer;}
+.fc-row .fv{font-size:11px;color:#555;width:22px;text-align:right;flex-shrink:0;}
+.divider-line{border:none;border-top:1px solid #222;margin:2px 0;}
+.main{flex:1;padding:32px;overflow-y:auto;}
+.main-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;}
+.main-header h2{font-size:12px;color:#444;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;}
+.main-header .edit-tip{font-size:11px;color:#333;}
+.dual-columns{display:flex;gap:48px;justify-content:center;}
+.theme-column{display:flex;flex-direction:column;gap:28px;}
+.column-header{display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;border-bottom:1px solid #222;}
+.column-header h3{font-size:13px;font-weight:700;letter-spacing:0.5px;}
+.column-header h3.light-title{color:#d4c8b4;}
+.column-header h3.dark-title{color:#888;}
+.col-dl-btn{background:rgba(201,169,110,.15);color:var(--gold);border:1px solid rgba(201,169,110,.3);padding:7px 16px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:background .2s;letter-spacing:0.3px;}
+.col-dl-btn:hover{background:rgba(201,169,110,.3);}
+.pages-col{display:flex;flex-direction:column;gap:28px;align-items:center;}
+.pw{display:flex;flex-direction:column;align-items:center;gap:10px;}
+.pw .page-num{font-size:11px;color:#444;letter-spacing:0.8px;}
+.pw-inner{position:relative;}
+.dl-btn{position:absolute;top:10px;right:10px;z-index:200;display:flex;align-items:center;gap:5px;background:rgba(0,0,0,.7);color:#fff;border:1px solid rgba(255,255,255,.15);padding:5px 11px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;backdrop-filter:blur(8px);transition:background .2s;letter-spacing:0.3px;}
+.dl-btn:hover{background:rgba(0,0,0,.9);}
+.dl-btn svg{width:11px;height:11px;flex-shrink:0;}
+.page{width:375px;height:500px;position:relative;overflow:hidden;flex-shrink:0;}
+[data-editable]{cursor:default;}
+[data-editable]:hover{outline:1.5px dashed rgba(201,169,110,.4);outline-offset:2px;border-radius:3px;}
+[data-editable][contenteditable=true]{outline:1.5px solid var(--gold)!important;outline-offset:2px;border-radius:3px;cursor:text;overflow:visible!important;-webkit-line-clamp:unset!important;}
+.img-zone{background-size:cover;background-position:50% 50%;background-repeat:no-repeat;position:relative;overflow:hidden;}
+.cover-photo{overflow:clip;}
+.img-zone:not([data-has-bg]){cursor:pointer;}
+.img-zone[data-has-bg]{cursor:grab;}
+.img-zone[data-has-bg]:active{cursor:grabbing;}
+.imgph{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;position:absolute;top:0;left:0;pointer-events:none;}
+.change-btn{position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.7);color:#fff;font-size:11px;padding:4px 10px;border-radius:20px;cursor:pointer;opacity:0;transition:opacity .2s;z-index:10;border:1px solid rgba(255,255,255,.15);}
+.img-zone[data-has-bg]:hover .change-btn{opacity:1;}
+.img-controls{position:absolute;bottom:0;left:0;right:0;z-index:200;display:flex;align-items:center;gap:8px;padding:7px 12px;background:linear-gradient(transparent,rgba(0,0,0,.75));opacity:0;transition:opacity .2s;pointer-events:none;}
+.img-zone[data-has-bg]:hover .img-controls{opacity:1;pointer-events:auto;}
+.img-controls .zoom-label{font-size:10px;color:rgba(255,255,255,.7);flex-shrink:0;letter-spacing:0.3px;}
+.img-controls input[type=range]{flex:1;-webkit-appearance:none;height:3px;background:rgba(255,255,255,.25);border-radius:2px;cursor:pointer;min-width:60px;}
+.img-controls input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:#fff;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.4);}
+.img-controls .zoom-val{font-size:10px;color:rgba(255,255,255,.7);width:30px;text-align:right;flex-shrink:0;}
+.img-controls .ctrl-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:10px;padding:3px 8px;border-radius:12px;cursor:pointer;flex-shrink:0;transition:background .15s;letter-spacing:0.2px;}
+.img-controls .ctrl-btn:hover{background:rgba(255,255,255,.3);}
+.img-controls .ctrl-btn.active{background:var(--gold);color:#1a0800;border-color:var(--gold);}
+.resize-handle{position:absolute;left:0;right:0;z-index:150;display:flex;align-items:center;justify-content:center;height:14px;cursor:ns-resize;opacity:0;transition:opacity .2s;}
+.page:hover .resize-handle{opacity:1;}
+.resize-handle::before{content:'';width:44px;height:4px;background:rgba(255,255,255,.35);border-radius:3px;}
+.resize-handle:hover::before,.resize-handle.active::before{background:var(--gold);width:60px;}
+.resize-handle.rh-dark::before{background:rgba(255,255,255,.2);}
+.resize-handle.rh-light::before{background:rgba(0,0,0,.15);}
+.resize-handle.rh-light:hover::before,.resize-handle.rh-light.active::before{background:var(--gold);}
+.move-handle{flex-shrink:0;display:flex;align-items:center;justify-content:center;height:14px;cursor:ns-resize;opacity:0;transition:opacity .2s;margin-top:-7px;}
+.page:hover .move-handle{opacity:1;}
+.move-handle::before{content:'';width:36px;height:3px;background:rgba(255,255,255,.3);border-radius:3px;box-shadow:0 4px 0 rgba(255,255,255,.3);}
+.move-handle:hover::before,.move-handle.active::before{background:#6cb4ee;box-shadow:0 4px 0 #6cb4ee;}
+.move-handle.mh-dark::before{background:rgba(255,255,255,.2);box-shadow:0 4px 0 rgba(255,255,255,.2);}
+.move-handle.mh-dark:hover::before,.move-handle.mh-dark.active::before{background:#6cb4ee;box-shadow:0 4px 0 #6cb4ee;}
+.move-handle.mh-light::before{background:rgba(0,0,0,.12);box-shadow:0 4px 0 rgba(0,0,0,.12);}
+.move-handle.mh-light:hover::before,.move-handle.mh-light.active::before{background:#6cb4ee;box-shadow:0 4px 0 #6cb4ee;}
+.page.cover{background:var(--dark-bg);}
+.page.cover-lp{background:var(--light-card);}
+.cover-photo{width:100%;height:280px;background:#201910;}
+.cover-lp .cover-photo{background:#e8dcd0;}
+.cover-photo .imgph .up-icon{width:44px;height:44px;border:1.5px dashed #333;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#333;}
+.cover-lp .cover-photo .imgph .up-icon{border-color:#c8bfae;color:#b8ad98;}
+.cover-photo .imgph span{font-size:12px;color:#444;}
+.cover-lp .cover-photo .imgph span{color:#b8ad98;}
+.cover-text{height:220px;padding:18px 24px 14px;background:var(--dark-bg);display:flex;flex-direction:column;justify-content:center;}
+.cover-lp .cover-text{background:var(--light-card);}
+.cover-tag{display:inline-flex;align-items:center;background:#1e1e1e;border-radius:20px;padding:3px 12px 4px;font-size:11px;color:var(--gold);margin-bottom:10px;align-self:flex-start;letter-spacing:0.3px;}
+.cover-lp .cover-tag{background:#f0e8d8;}
+.cover-title{font-size:var(--fs-title);font-weight:900;color:#fff;line-height:1.3;letter-spacing:-0.5px;margin-bottom:5px;}
+.cover-title .g{color:var(--gold);}
+.cover-lp .cover-title{color:#1a1208;}
+.cover-sub{font-size:var(--fs-sub);color:#555;line-height:1.6;margin-top:2px;}
+.cover-lp .cover-sub{color:#8a7f6e;}
+.page.dp{background:var(--dark-bg);display:flex;flex-direction:column;}
+.dp .cat{position:absolute;top:15px;left:15px;font-size:10.5px;color:var(--gold);font-weight:600;letter-spacing:0.5px;z-index:2;}
+.dp .dp-content{padding:38px 16px 0;flex-shrink:0;}
+.dp .badge{display:inline-flex;align-items:center;background:var(--gold);color:#1a0800;border-radius:5px;padding:2px 10px 3px;font-size:11px;font-weight:800;margin-bottom:7px;letter-spacing:0.2px;}
+.dp .ftitle{font-size:var(--fs-title);font-weight:900;color:#fff;line-height:1.25;margin-bottom:5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.dp .fsub{font-size:var(--fs-sub);font-weight:600;color:#ddd0bb;line-height:1.55;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.dp .dbox{background:var(--dark-box);border-radius:9px;padding:11px 13px;}
+.dp .dbox p{font-size:var(--fs-body);color:#b0997e;line-height:1.78;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;}
+.dp .imgzone{margin:10px 10px 10px;border-radius:10px;overflow:hidden;position:relative;height:280px;overflow-y:clip;}
+.dp .imgzone .imgph{background:#201910;}
+.dp .imgzone .imgph .icon{font-size:26px;opacity:.35;}
+.dp .imgzone .imgph span{font-size:11px;color:#503d28;}
+.page.lp{background:#0d0d0d;}
+.lp .cat{position:absolute;top:12px;left:14px;font-size:10.5px;color:var(--gold);font-weight:600;letter-spacing:0.5px;}
+.lp .card{position:absolute;top:28px;left:10px;right:10px;bottom:10px;background:var(--light-card);border-radius:15px;overflow:hidden;overflow-y:visible;display:flex;flex-direction:column;}
+.lp .card-top{padding:15px 15px 0;flex-shrink:0;}
+.lp .badge-row{display:flex;align-items:center;gap:7px;margin-bottom:5px;flex-wrap:nowrap;}
+.lp .badge{display:inline-flex;align-items:center;background:var(--gold);color:#1a0800;border-radius:5px;padding:2px 9px 3px;font-size:11px;font-weight:800;white-space:nowrap;flex-shrink:0;letter-spacing:0.2px;}
+.lp .ftitle{font-size:calc(var(--fs-title) - 6px);font-weight:900;color:#111;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.lp .fsub{font-size:var(--fs-sub);font-weight:600;color:#333;line-height:1.55;margin:5px 0 7px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.lp .divider{border:none;border-top:1.5px dashed #d0c8be;margin:4px 0 8px;}
+.lp .dtext{font-size:var(--fs-body);color:#555;line-height:1.78;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+.lp .card-img{margin:8px 10px 10px;border-radius:10px;overflow:hidden;position:relative;background:#e8dcd0;height:230px;overflow-y:clip;}
+.lp .card-img .imgph .icon{font-size:26px;opacity:.3;}
+.lp .card-img .imgph span{font-size:11px;color:#aaa;}
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:400px;color:#333;gap:12px;width:100%;}
+.empty-state .big{font-size:40px;}
+.empty-state p{font-size:13px;line-height:1.7;text-align:center;max-width:300px;}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo"><div class="dot"></div><span>LiteArt</span></div>
+  <p class="hint">输入主题、文章或段落，自动生成浅色 + 深色两套卡片，每套 1 封面 + 5 页内容。</p>
+  <textarea id="inputText" placeholder="在此输入内容...">800V主动悬架 全线控底盘 L4的起点
+理想L9 LeVIS底盘技术深度解读
+为什么一定要上800V主动悬架？为什么要做完全体线控底盘？这套系统对L4自动驾驶究竟意味着什么？李想与产品线总裁唐静，聊透理想对底盘和悬架的底层思考。
+
+三座大山
+2022年立项的三大技术攻坚
+底盘、芯片、电池——理想在2022年同时启动三大核心技术研发。底盘是工业公认最难攻克的领域，理想的目标不仅是追平豪华品牌，而是要做行业最领先的悬架，同时必须面向智能化未来，做到主动悬架加全线控底盘的完整方案。
+
+800V四轮独立悬架
+每轮支撑力超1万牛，无横向稳定杆
+面对整备质量2.8吨、满载超3吨的大型SUV，理想选择了800V全主动悬架方案：四个轮子完全独立控制，每个轮子支撑力超过1万牛，取消横向稳定杆。山路操控感超越法拉利Purosangue，二阶舒适性远胜保时捷Panamera。
+
+全线控底盘的百变逻辑
+从交付即定稿，到持续进化
+传统悬架在交付那天特性就写死了。线控转向加线控制动让转向手感、刹车脚感、转向比全部数字化可控。不同气候区域可自适应调整，未来甚至开放用户自定义驾驶参数。悬架不再是硬件，而是可持续进化的软件体验。
+
+13毫秒制动响应
+比人类反应快30倍的安全底线
+制动控制程序集成在马赫M100芯片中，响应时间压缩至13毫秒，远低于人类的400毫秒。制动距离缩短数米，可能避免98%的事故。AEB有效速度提升至130-140km/h，覆盖最危险的场景。即使转向失效，四轮独立制动仍可实现安全靠边停车。
+
+通往L4的起点
+控制系统必须比人快50%
+2028至2033年是攻克L4的关键五年。端到端模型直接输出控制指令，但车辆控制系统本身必须升级——响应速度要比人快50%才有安全保障。800V主动悬架和全线控底盘，正是实现这一目标的硬件基础。不买主动悬架和全线控底盘，开过之后你一定后悔。</textarea>
+  <button class="btn btn-primary" onclick="generate()">生 成 卡 片</button>
+  <hr class="divider-line">
+  <div class="fc-section">
+    <div class="fc-label">字号调节</div>
+    <div class="fc-row">
+      <span class="name">标题</span>
+      <input type="range" min="16" max="36" value="27" oninput="setFontSize('title',this.value)">
+      <span class="fv" id="fv-title">27</span>
+    </div>
+    <div class="fc-row">
+      <span class="name">副标题</span>
+      <input type="range" min="10" max="20" value="13" oninput="setFontSize('sub',this.value)">
+      <span class="fv" id="fv-sub">13</span>
+    </div>
+    <div class="fc-row">
+      <span class="name">正文</span>
+      <input type="range" min="9" max="17" value="12" oninput="setFontSize('body',this.value)">
+      <span class="fv" id="fv-body">12</span>
+    </div>
+  </div>
+  <hr class="divider-line">
+  <button class="btn btn-ghost" onclick="downloadAll('light')">下载浅色全部</button>
+  <button class="btn btn-ghost" onclick="downloadAll('dark')">下载深色全部</button>
+</aside>
+
+<main class="main">
+  <div class="main-header">
+    <h2>浅色 6 页 + 深色 6 页 · 共 12 页</h2>
+    <span class="edit-tip">双击文字可编辑 · 点击图片区域上传</span>
+  </div>
+  <div class="dual-columns" id="dualColumns">
+    <div class="empty-state">
+      <div class="big">✦</div>
+      <p>在左侧输入内容，点击「生成卡片」开始创作</p>
+    </div>
+  </div>
+</main>
+
+<div id="file-inputs" style="display:none"></div>
+
+<script>
+const BADGES = ['核心观点','深度解析','关键数据','实战经验','总结回顾'];
+const CATEGORIES = ['深度解析','行业洞察','核心观点','实战指南','趋势研判'];
+
+function setFontSize(type, val) {
+  const n = parseInt(val);
+  const map = {title:'--fs-title',sub:'--fs-sub',body:'--fs-body'};
+  document.documentElement.style.setProperty(map[type], n + 'px');
+  document.getElementById('fv-' + type).textContent = n;
+}
+
+function parseInput(raw) {
+  const text = raw.trim();
+  if (!text) return demoContent();
+  let parts = text.split(/\n{2,}/).map(p=>p.trim()).filter(Boolean);
+  if (parts.length < 2) parts = text.split(/\n/).map(p=>p.trim()).filter(Boolean);
+  if (parts.length < 2) parts = text.match(/[^\u3002\uff01\uff1f\n\.!?]+[\u3002\uff01\uff1f\n\.!?]*/g)?.map(s=>s.trim()).filter(Boolean)||[text];
+  const sections = distributeInto(parts, 6);
+  return sections.map((sec,i)=>extractSection(sec,i));
+}
+
+function distributeInto(parts, n) {
+  if (parts.length >= n) return parts.slice(0,n);
+  const out=[];
+  for(let i=0;i<n;i++) out.push(parts[i%parts.length]);
+  return out;
+}
+
+function extractSection(text, idx) {
+  const lines = text.split(/\n/).map(l=>l.trim()).filter(Boolean);
+  const title = cleanTitle(lines[0]||'精选内容');
+  const sub   = lines[1]||autoSub(title);
+  const body  = lines.slice(2).join(' ')||lines.slice(1).join(' ')||title;
+  return {title,sub,body};
+}
+
+function cleanTitle(t){return t.replace(/^[#\-\*\d\.\s]+/,'').trim().slice(0,20);}
+
+function autoSub(title){
+  const map={'AI':'人工智能重塑未来','数据':'数据驱动决策','增长':'持续增长策略','创新':'创新引领变革','管理':'高效管理之道','产品':'产品思维进化','营销':'精准营销方法','用户':'用户价值为先'};
+  for(const[k,v]of Object.entries(map))if(title.includes(k))return v;
+  return '深度洞察 · 前沿趋势';
+}
+
+function demoContent(){
+  const raw = `人工智能时代的机遇与挑战
+
+AI 正以前所未有的速度渗透各行各业，从医疗诊断到自动驾驶，从内容创作到代码生成，每一个领域都在经历深刻变革。
+
+技术突破带来的红利
+大模型能力边界持续扩展，多模态理解、长文本推理、工具调用等能力日趋成熟，为企业降本增效提供了新路径。
+
+数据成为核心竞争力
+在 AI 时代，高质量的私有数据是企业构建差异化壁垒的关键。谁掌握了数据，谁就掌握了未来。
+
+人机协作重新定义工作
+未来的职场不是人与 AI 的对抗，而是协作。学会与 AI 配合，将成为每个职场人的必备技能。
+
+风险与监管不可忽视
+技术的快速发展也带来了隐私、安全、伦理等挑战。构建负责任的 AI 生态，需要企业、政府与社会共同努力。`;
+  return parseInput(raw);
+}
+
+function generate(){
+  const raw=document.getElementById('inputText').value;
+  const data=parseInput(raw);
+  const container=document.getElementById('dualColumns');
+  container.innerHTML='';
+  document.getElementById('file-inputs').innerHTML='';
+
+  /* Build light column */
+  const lightCol=document.createElement('div');lightCol.className='theme-column';
+  lightCol.innerHTML=`<div class="column-header"><h3 class="light-title">☀ 浅色主题</h3><button class="col-dl-btn" onclick="downloadAll('light')">下载全部</button></div>`;
+  const lightPages=document.createElement('div');lightPages.className='pages-col';
+  data.forEach((sec,idx)=>{
+    const pw=createPageWrapper(sec,idx,'light',data);
+    lightPages.appendChild(pw);
+  });
+  lightCol.appendChild(lightPages);
+
+  /* Build dark column */
+  const darkCol=document.createElement('div');darkCol.className='theme-column';
+  darkCol.innerHTML=`<div class="column-header"><h3 class="dark-title">🌙 深色主题</h3><button class="col-dl-btn" onclick="downloadAll('dark')">下载全部</button></div>`;
+  const darkPages=document.createElement('div');darkPages.className='pages-col';
+  data.forEach((sec,idx)=>{
+    const pw=createPageWrapper(sec,idx,'dark',data);
+    darkPages.appendChild(pw);
+  });
+  darkCol.appendChild(darkPages);
+
+  container.appendChild(lightCol);
+  container.appendChild(darkCol);
+
+  /* Bind all uploads */
+  data.forEach((sec,idx)=>{
+    bindUpload(`light-${idx}`);
+    bindUpload(`dark-${idx}`);
+  });
+}
+
+function createPageWrapper(sec,idx,theme,data){
+  const pw=document.createElement('div');pw.className='pw';
+  const inner=document.createElement('div');inner.className='pw-inner';
+  const page=buildPage(sec,idx,theme);
+  inner.appendChild(page);
+  const dlBtn=document.createElement('button');
+  dlBtn.className='dl-btn';dlBtn.id=`dl-${theme}-${idx}`;
+  dlBtn.innerHTML=`<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 12l-4-4h2.5V2h3v6H12L8 12zm-5 2h10v-1.5H3V14z"/></svg> 下载`;
+  dlBtn.onclick=()=>downloadOne(idx,theme);
+  inner.appendChild(dlBtn);
+  const lbl=document.createElement('div');lbl.className='page-num';
+  lbl.textContent=idx===0?'封面':`第 ${idx} 页`;
+  pw.appendChild(inner);pw.appendChild(lbl);
+  return pw;
+}
+
+function buildPage(sec,idx,theme){
+  const page=document.createElement('div');
+  const isFirst=idx===0;
+  if(isFirst){
+    page.className=theme==='light'?'page cover-lp':'page cover';
+    page.id=`page-${theme}-${idx}`;
+    page.innerHTML=coverHTML(sec,idx,theme);
+  } else if(theme==='dark'){
+    page.className='page dp';
+    page.id=`page-${theme}-${idx}`;
+    page.innerHTML=darkHTML(sec,idx);
+  } else {
+    page.className='page lp';
+    page.id=`page-${theme}-${idx}`;
+    page.innerHTML=lightHTML(sec,idx);
+  }
+  return page;
+}
+
+function coverHTML(sec,idx,theme){
+  const[g,w]=splitGold(sec.title);
+  const photoId=`photo-${theme}-${idx}`;
+  const phId=`ph-${theme}-${idx}`;
+  const rhClass=theme==='light'?'rh-light':'rh-dark';
+  return `<div class="cover-photo img-zone" id="${photoId}">
+    <div class="imgph" id="${phId}">
+      <div class="up-icon">＋</div>
+      <span>点击上传封面图</span>
+    </div>
+    <div class="change-btn">更换图片</div>
+  </div>
+  <div class="resize-handle ${rhClass}" data-resize="cover" data-page-id="page-${theme}-${idx}"></div>
+  <div class="cover-text">
+    <div class="cover-tag" data-editable>${sec.sub||'深度解析'}</div>
+    <div class="cover-title" data-editable><span class="g">${g}</span>${w}</div>
+    <div class="cover-sub" data-editable>${sec.body.slice(0,60)}</div>
+  </div>`;
+}
+
+function darkHTML(sec,idx){
+  const badge=BADGES[(idx-1)%BADGES.length];
+  const cat=CATEGORIES[(idx-1)%CATEGORIES.length];
+  const photoId=`photo-dark-${idx}`;
+  const phId=`ph-dark-${idx}`;
+  return `<div class="cat" data-editable>${cat}</div>
+  <div class="dp-content">
+    <div class="badge" data-editable>${badge}</div>
+    <div class="ftitle" data-editable>${sec.title}</div>
+    <div class="fsub" data-editable>${sec.sub}</div>
+    <div class="dbox"><p data-editable data-clamp="4">${sec.body}</p></div>
+  </div>
+  <div class="move-handle mh-dark" data-move="dp" data-page-id="page-dark-${idx}"></div>
+  <div class="imgzone img-zone" id="${photoId}">
+    <div class="imgph" id="${phId}">
+      <span class="icon">🖼</span>
+      <span>点击上传图片</span>
+    </div>
+    <div class="change-btn">更换图片</div>
+    <div class="resize-handle rh-dark" data-resize="dp" data-page-id="page-dark-${idx}"></div>
+  </div>`;
+}
+
+function lightHTML(sec,idx){
+  const badge=BADGES[(idx-1)%BADGES.length];
+  const cat=CATEGORIES[(idx-1)%CATEGORIES.length];
+  const photoId=`photo-light-${idx}`;
+  const phId=`ph-light-${idx}`;
+  return `<div class="cat" data-editable>${cat}</div>
+  <div class="card">
+    <div class="card-top">
+      <div class="badge-row">
+        <span class="badge" data-editable>${badge}</span>
+        <span class="ftitle" data-editable>${sec.title}</span>
+      </div>
+      <div class="fsub" data-editable>${sec.sub}</div>
+      <hr class="divider">
+      <p class="dtext" data-editable data-clamp="3">${sec.body}</p>
+    </div>
+    <div class="move-handle mh-light" data-move="lp" data-page-id="page-light-${idx}"></div>
+    <div class="card-img img-zone" id="${photoId}">
+      <div class="imgph" id="${phId}">
+        <span class="icon">🖼</span>
+        <span>点击上传图片</span>
+      </div>
+      <div class="change-btn">更换图片</div>
+      <div class="resize-handle rh-light" data-resize="lp" data-page-id="page-light-${idx}"></div>
+    </div>
+  </div>`;
+}
+
+function splitGold(title){
+  const si=title.indexOf(' ');
+  if(si>0&&si<title.length-1)return[title.slice(0,si),'<br>'+title.slice(si+1)];
+  const mid=Math.max(2,Math.ceil(title.length*.45));
+  return[title.slice(0,mid),title.slice(mid)?'<br>'+title.slice(mid):''];
+}
+
+function bindUpload(key){
+  const inp=document.createElement('input');
+  inp.type='file';inp.accept='image/*';inp.id=`fi-${key}`;
+  document.getElementById('file-inputs').appendChild(inp);
+  inp.onchange=(e)=>{
+    const file=e.target.files[0];if(!file)return;
+    const reader=new FileReader();
+    reader.onload=(ev)=>setImage(key,ev.target.result);
+    reader.readAsDataURL(file);e.target.value='';
+  };
+  setTimeout(()=>{
+    const zone=document.getElementById(`photo-${key}`);
+    if(!zone)return;
+    zone.addEventListener('click',(e)=>{
+      if(e.target.classList.contains('change-btn'))return;
+      if(!zone.dataset.hasBg)triggerUpload(key);
+    });
+    const btn=zone.querySelector('.change-btn');
+    if(btn)btn.onclick=(e)=>{e.stopPropagation();triggerUpload(key);};
+  },0);
+}
+
+function triggerUpload(key){document.getElementById(`fi-${key}`)?.click();}
+
+function setImage(key,src){
+  const zone=document.getElementById(`photo-${key}`);
+  const ph=document.getElementById(`ph-${key}`);
+  if(!zone)return;
+  if(ph)ph.style.display='none';
+  zone.dataset.bgx='0';zone.dataset.bgy='0';zone.dataset.hasBg='1';
+  zone.dataset.zoom='100';zone.dataset.fitMode='cover';
+  zone.style.backgroundImage=`url(${src})`;
+  zone.style.backgroundSize='cover';
+  zone.style.backgroundPosition='calc(50% + 0px) calc(50% + 0px)';
+  buildImgControls(zone,key);
+}
+
+function buildImgControls(zone,key){
+  let existing=zone.querySelector('.img-controls');
+  if(existing)existing.remove();
+  const bar=document.createElement('div');bar.className='img-controls';
+  bar.innerHTML=`
+    <span class="zoom-label">缩放</span>
+    <input type="range" min="30" max="300" value="100" class="zoom-slider">
+    <span class="zoom-val">100%</span>
+    <button class="ctrl-btn fit-btn" title="切换适应模式">铺满</button>
+    <button class="ctrl-btn reset-btn" title="重置">↺</button>
+  `;
+  zone.appendChild(bar);
+  const slider=bar.querySelector('.zoom-slider');
+  const valSpan=bar.querySelector('.zoom-val');
+  const fitBtn=bar.querySelector('.fit-btn');
+  const resetBtn=bar.querySelector('.reset-btn');
+
+  slider.oninput=(e)=>{
+    e.stopPropagation();
+    const v=parseInt(slider.value);
+    zone.dataset.zoom=v;
+    zone.dataset.fitMode='custom';
+    valSpan.textContent=v+'%';
+    zone.style.backgroundSize=v+'%';
+    fitBtn.classList.remove('active');
+    fitBtn.textContent='铺满';
+  };
+  slider.onmousedown=(e)=>e.stopPropagation();
+
+  fitBtn.onclick=(e)=>{
+    e.stopPropagation();
+    const current=zone.dataset.fitMode;
+    if(current==='cover'){
+      zone.dataset.fitMode='contain';
+      zone.style.backgroundSize='contain';
+      fitBtn.textContent='包含';
+      fitBtn.classList.add('active');
+      slider.value=100;valSpan.textContent='—';
+    } else {
+      zone.dataset.fitMode='cover';
+      zone.style.backgroundSize='cover';
+      fitBtn.textContent='铺满';
+      fitBtn.classList.remove('active');
+      zone.dataset.zoom='100';slider.value=100;valSpan.textContent='100%';
+    }
+  };
+
+  resetBtn.onclick=(e)=>{
+    e.stopPropagation();
+    zone.dataset.bgx='0';zone.dataset.bgy='0';zone.dataset.zoom='100';zone.dataset.fitMode='cover';
+    zone.style.backgroundPosition='calc(50% + 0px) calc(50% + 0px)';
+    zone.style.backgroundSize='cover';
+    slider.value=100;valSpan.textContent='100%';
+    fitBtn.textContent='铺满';fitBtn.classList.remove('active');
+  };
+}
+
+/* DRAG */
+let dragState=null;
+document.addEventListener('mousedown',(e)=>{
+  const zone=e.target.closest('.img-zone[data-has-bg]');
+  if(!zone||e.target.classList.contains('change-btn')||e.target.closest('.img-controls')||e.target.closest('.move-handle')||e.target.closest('.resize-handle'))return;
+  e.preventDefault();
+  dragState={zone,startX:e.clientX,startY:e.clientY,
+    startBgX:parseFloat(zone.dataset.bgx||0),
+    startBgY:parseFloat(zone.dataset.bgy||0),moved:false};
+});
+document.addEventListener('mousemove',(e)=>{
+  if(!dragState)return;
+  const dx=e.clientX-dragState.startX,dy=e.clientY-dragState.startY;
+  if(Math.abs(dx)>3||Math.abs(dy)>3)dragState.moved=true;
+  const nx=dragState.startBgX+dx,ny=dragState.startBgY+dy;
+  dragState.zone.dataset.bgx=nx;dragState.zone.dataset.bgy=ny;
+  dragState.zone.style.backgroundPosition=`calc(50% + ${nx}px) calc(50% + ${ny}px)`;
+});
+document.addEventListener('mouseup',()=>{dragState=null;});
+
+/* MOVE HANDLE DRAG — moves image zone container up/down */
+let moveState=null;
+document.addEventListener('mousedown',(e)=>{
+  const handle=e.target.closest('.move-handle');
+  if(!handle)return;
+  e.preventDefault();e.stopPropagation();
+  const pageId=handle.dataset.pageId;
+  const page=document.getElementById(pageId);
+  if(!page)return;
+  const type=handle.dataset.move;
+  const imgzone=type==='dp'?page.querySelector('.imgzone'):page.querySelector('.card-img');
+  if(!imgzone)return;
+  handle.classList.add('active');
+  /* Snap handle to absolute at imgzone top BEFORE layout shift */
+  const container=type==='lp'?page.querySelector('.card'):page;
+  const cRect=container.getBoundingClientRect();
+  const izRect=imgzone.getBoundingClientRect();
+  handle.style.position='absolute';
+  handle.style.top=(izRect.top-cRect.top-7)+'px';
+  handle.style.marginTop='0';
+  const cs=getComputedStyle(imgzone);
+  moveState={handle,page,type,imgzone,container,startY:e.clientY,
+    startMarginTop:parseFloat(cs.marginTop)||0};
+});
+document.addEventListener('mousemove',(e)=>{
+  if(!moveState)return;
+  const dy=e.clientY-moveState.startY;
+  const newMarginTop=moveState.startMarginTop+dy;
+  const maxMT=moveState.type==='dp'?150:120;
+  const clamped=Math.max(-20,Math.min(maxMT,newMarginTop));
+  moveState.imgzone.style.marginTop=clamped+'px';
+  /* Update handle position to follow imgzone */
+  const cRect=moveState.container.getBoundingClientRect();
+  const izRect=moveState.imgzone.getBoundingClientRect();
+  moveState.handle.style.top=(izRect.top-cRect.top-7)+'px';
+});
+document.addEventListener('mouseup',()=>{
+  if(moveState){
+    moveState.handle.classList.remove('active');
+    moveState.handle.style.position='';
+    moveState.handle.style.top='';
+    moveState.handle.style.marginTop='';
+    moveState=null;
+  }
+});
+
+/* RESIZE HANDLE DRAG */
+let resizeState=null;
+document.addEventListener('mousedown',(e)=>{
+  const handle=e.target.closest('.resize-handle');
+  if(!handle)return;
+  e.preventDefault();e.stopPropagation();
+  const pageId=handle.dataset.pageId;
+  const page=document.getElementById(pageId);
+  if(!page)return;
+  const type=handle.dataset.resize;
+  const pageRect=page.getBoundingClientRect();
+  handle.classList.add('active');
+  resizeState={handle,page,type,pageRect,startY:e.clientY};
+  if(type==='cover'){
+    const photo=page.querySelector('.cover-photo');
+    const text=page.querySelector('.cover-text');
+    resizeState.photo=photo;resizeState.text=text;
+    resizeState.initPhotoH=photo.offsetHeight;
+    resizeState.initTextH=text.offsetHeight;
+    resizeState.totalH=photo.offsetHeight+text.offsetHeight;
+  } else if(type==='dp'){
+    const imgzone=page.querySelector('.imgzone');
+    const content=page.querySelector('.dp-content');
+    resizeState.imgzone=imgzone;resizeState.content=content;
+    resizeState.initImgH=imgzone.offsetHeight;
+    resizeState.pageH=page.offsetHeight;
+  } else if(type==='lp'){
+    const card=page.querySelector('.card');
+    const cardImg=page.querySelector('.card-img');
+    const cardTop=page.querySelector('.card-top');
+    resizeState.card=card;resizeState.cardImg=cardImg;resizeState.cardTop=cardTop;
+    resizeState.initImgH=cardImg.offsetHeight;
+    resizeState.cardH=card.offsetHeight;
+  }
+});
+document.addEventListener('mousemove',(e)=>{
+  if(!resizeState)return;
+  const dy=e.clientY-resizeState.startY;
+  if(resizeState.type==='cover'){
+    const newPhotoH=Math.max(120,Math.min(resizeState.totalH-80,resizeState.initPhotoH+dy));
+    const newTextH=resizeState.totalH-newPhotoH;
+    resizeState.photo.style.height=newPhotoH+'px';
+    resizeState.text.style.height=newTextH+'px';
+  } else if(resizeState.type==='dp'){
+    const newImgH=Math.max(80,Math.min(resizeState.pageH-100,resizeState.initImgH-dy));
+    resizeState.imgzone.style.height=newImgH+'px';
+    const mh=resizeState.page.querySelector('.move-handle');
+    if(mh){
+      mh.style.position='absolute';mh.style.marginTop='0';
+      const izRect=resizeState.imgzone.getBoundingClientRect();
+      const pgRect=resizeState.page.getBoundingClientRect();
+      mh.style.top=(izRect.top-pgRect.top-7)+'px';
+    }
+  } else if(resizeState.type==='lp'){
+    const newImgH=Math.max(60,Math.min(resizeState.cardH-80,resizeState.initImgH-dy));
+    resizeState.cardImg.style.height=newImgH+'px';
+    const mh=resizeState.card.querySelector('.move-handle');
+    if(mh){
+      mh.style.position='absolute';mh.style.marginTop='0';
+      const izRect=resizeState.cardImg.getBoundingClientRect();
+      const pgRect=resizeState.page.getBoundingClientRect();
+      mh.style.top=(izRect.top-pgRect.top-7)+'px';
+    }
+  }
+});
+document.addEventListener('mouseup',()=>{
+  if(resizeState){
+    resizeState.handle.classList.remove('active');
+    /* Reset move-handle back to flex layout */
+    const mhs=resizeState.page.querySelectorAll('.move-handle');
+    mhs.forEach(m=>{m.style.position='';m.style.top='';m.style.marginTop='';});
+    resizeState=null;
+  }
+});
+
+/* EDIT */
+document.addEventListener('dblclick',(e)=>{
+  const el=e.target.closest('[data-editable]');
+  if(!el||el.contentEditable==='true')return;
+  el.contentEditable='true';
+  el.style.webkitLineClamp='unset';
+  el.style.overflow='visible';
+  el.focus();
+  const r=document.createRange();r.selectNodeContents(el);
+  const s=window.getSelection();s.removeAllRanges();s.addRange(r);
+  e.preventDefault();
+});
+document.addEventListener('click',(e)=>{
+  document.querySelectorAll('[contenteditable="true"]').forEach(el=>{
+    if(!el.contains(e.target))exitEdit(el);
+  });
+});
+document.addEventListener('keydown',(e)=>{
+  if(e.key==='Escape')document.querySelectorAll('[contenteditable="true"]').forEach(exitEdit);
+});
+function exitEdit(el){
+  el.contentEditable='false';
+  const c=el.dataset.clamp;
+  if(c){el.style.webkitLineClamp=c;el.style.overflow='hidden';}
+  else{el.style.webkitLineClamp='';el.style.overflow='';}
+}
+
+/* DOWNLOAD */
+async function downloadOne(idx,theme){
+  const page=document.getElementById(`page-${theme}-${idx}`);
+  const btn=document.getElementById(`dl-${theme}-${idx}`);
+  if(!page)return;
+  btn.style.display='none';
+  document.querySelectorAll('[contenteditable="true"]').forEach(exitEdit);
+  const cbs=page.querySelectorAll('.change-btn');
+  const ictrs=page.querySelectorAll('.img-controls');
+  const rhs=page.querySelectorAll('.resize-handle');
+  const mhs=page.querySelectorAll('.move-handle');
+  cbs.forEach(b=>{b.style.opacity='0';b.style.pointerEvents='none';});
+  ictrs.forEach(c=>{c.style.opacity='0';c.style.pointerEvents='none';});
+  rhs.forEach(r=>{r.style.display='none';});
+  mhs.forEach(m=>{m.style.display='none';});
+  try{
+    const canvas=await html2canvas(page,{
+      scale:2,useCORS:true,allowTaint:true,backgroundColor:null,logging:false,
+      onclone(doc){
+        doc.querySelectorAll('*').forEach(el=>{
+          el.style.backdropFilter='none';
+          el.style.webkitBackdropFilter='none';
+        });
+        doc.querySelectorAll('.img-zone').forEach(z=>{
+          const orig=document.getElementById(z.id);
+          if(orig&&orig.dataset.hasBg){
+            z.style.backgroundImage=orig.style.backgroundImage;
+            z.style.backgroundSize=orig.style.backgroundSize;
+            z.style.backgroundPosition=orig.style.backgroundPosition;
+          }
+        });
+      }
+    });
+    const themeLabel=theme==='light'?'浅色':'深色';
+    const a=document.createElement('a');
+    a.download=idx===0?`${themeLabel}-封面.png`:`${themeLabel}-第${idx}页.png`;
+    a.href=canvas.toDataURL('image/png');a.click();
+  }catch(err){alert('下载失败: '+err.message);}
+  finally{
+    btn.style.display='';
+    btn.innerHTML=`<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 12l-4-4h2.5V2h3v6H12L8 12zm-5 2h10v-1.5H3V14z"/></svg> 下载`;
+    cbs.forEach(b=>{b.style.opacity='';b.style.pointerEvents='';});
+    ictrs.forEach(c=>{c.style.opacity='';c.style.pointerEvents='';});
+    rhs.forEach(r=>{r.style.display='';});
+    mhs.forEach(m=>{m.style.display='';});
+  }
+}
+
+async function downloadAll(theme){
+  if(!theme){alert('请选择下载浅色或深色主题');return;}
+  for(let i=0;i<6;i++){
+    await downloadOne(i,theme);
+    await new Promise(r=>setTimeout(r,300));
+  }
+}
+
+window.addEventListener('load',generate);
+</script>
+</body>
+</html>
