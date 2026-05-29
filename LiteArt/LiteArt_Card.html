@@ -722,6 +722,9 @@ const EXPORT_TARGET_LONG_EDGE = 2400;
 const EXPORT_MIN_SCALE = 3;
 const EXPORT_MAX_SCALE = 5;
 
+/* Store original Image objects for high-quality export */
+const _imageCache = {};
+
 function getExportScale(el){
   const rect = el.getBoundingClientRect();
   const width = Math.max(el.scrollWidth, Math.round(rect.width), 1);
@@ -729,6 +732,140 @@ function getExportScale(el){
   const fitScale = EXPORT_TARGET_LONG_EDGE / Math.max(width, height);
   const deviceScale = window.devicePixelRatio || 1;
   return Math.max(EXPORT_MIN_SCALE, Math.min(EXPORT_MAX_SCALE, Math.max(deviceScale, fitScale)));
+}
+
+function loadImage(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
+}
+
+function parseBgUrl(cssVal) {
+  if (!cssVal) return null;
+  const m = cssVal.match(/url\(["']?(.+?)["']?\)/);
+  return m ? m[1] : null;
+}
+
+/* Parse CSS background-position like 'calc(50% + 12px) calc(50% + -5px)' or '50% 50%' */
+function parseBgPosition(cssVal, containerW, containerH, imgW, imgH, bgSize) {
+  let ox = 0, oy = 0;
+  if (!cssVal) return {ox, oy};
+  /* extract calc or plain values */
+  const parts = cssVal.match(/calc\(50%\s*\+\s*(-?[\d.]+)px\)|(-?[\d.]+)(%|px)/g);
+  if (!parts || parts.length < 2) return {ox, oy};
+  function parseOne(token, containerSize, imgSize) {
+    const calcMatch = token.match(/calc\(50%\s*\+\s*(-?[\d.]+)px\)/);
+    if (calcMatch) return parseFloat(calcMatch[1]);
+    const pctMatch = token.match(/(-?[\d.]+)%/);
+    if (pctMatch) return (parseFloat(pctMatch[1]) - 50) / 100 * (containerSize - imgSize);
+    const pxMatch = token.match(/(-?[\d.]+)px/);
+    if (pxMatch) return parseFloat(pxMatch[1]);
+    return 0;
+  }
+  ox = parseOne(parts[0], containerW, imgW);
+  oy = parseOne(parts[1], containerH, imgH);
+  return {ox, oy};
+}
+
+/* Compute the drawn image rect inside the container for cover/contain/custom% */
+function computeBgDrawRect(imgW, imgH, containerW, containerH, bgSizeVal, bgPosVal) {
+  let drawW, drawH;
+  const imgAspect = imgW / imgH;
+  const cAspect = containerW / containerH;
+  if (!bgSizeVal || bgSizeVal === 'cover') {
+    if (imgAspect > cAspect) { drawH = containerH; drawW = drawH * imgAspect; }
+    else { drawW = containerW; drawH = drawW / imgAspect; }
+  } else if (bgSizeVal === 'contain') {
+    if (imgAspect > cAspect) { drawW = containerW; drawH = drawW / imgAspect; }
+    else { drawH = containerH; drawW = drawH * imgAspect; }
+  } else {
+    const pct = parseFloat(bgSizeVal) / 100;
+    if (!isNaN(pct)) {
+      /* percentage applies to width */
+      drawW = containerW * pct;
+      drawH = drawW / imgAspect;
+    } else {
+      drawW = containerW; drawH = containerH;
+    }
+  }
+  const {ox, oy} = parseBgPosition(bgPosVal, containerW, containerH, drawW, drawH, bgSizeVal);
+  const dx = (containerW - drawW) / 2 + ox;
+  const dy = (containerH - drawH) / 2 + oy;
+  return {dx, dy, drawW, drawH};
+}
+
+/* After html2canvas renders, overlay original images at full quality */
+async function overlayOriginalImages(canvas, pageEl, scale) {
+  const ctx = canvas.getContext('2d');
+  const zones = pageEl.querySelectorAll('.img-zone[data-has-bg]');
+  console.log(`[overlayOriginalImages] Found ${zones.length} zones with background images`);
+  
+  for (const zone of zones) {
+    const bgUrl = parseBgUrl(zone.style.backgroundImage);
+    if (!bgUrl) {
+      console.log('[overlayOriginalImages] No bgUrl found for zone:', zone.id);
+      continue;
+    }
+    console.log('[overlayOriginalImages] Processing zone:', zone.id);
+    
+    let img = _imageCache[bgUrl];
+    if (!img) {
+      console.log('[overlayOriginalImages] Loading image from cache miss...');
+      try { img = await loadImage(bgUrl); _imageCache[bgUrl] = img; } 
+      catch(e) { 
+        console.error('[overlayOriginalImages] Failed to load image:', e); 
+        continue; 
+      }
+    }
+    console.log('[overlayOriginalImages] Image loaded, natural size:', img.naturalWidth, 'x', img.naturalHeight);
+    
+    /* Get zone position relative to page using offsetLeft/offsetTop for accuracy */
+    let target = zone;
+    let relX = 0, relY = 0;
+    while (target && target !== pageEl) {
+      relX += target.offsetLeft || 0;
+      relY += target.offsetTop || 0;
+      target = target.offsetParent;
+    }
+    const zW = zone.offsetWidth;
+    const zH = zone.offsetHeight;
+    console.log('[overlayOriginalImages] Zone position:', relX, relY, 'size:', zW, 'x', zH);
+    
+    /* Compute how the background image is drawn within the zone */
+    const {dx, dy, drawW, drawH} = computeBgDrawRect(
+      img.naturalWidth, img.naturalHeight, zW, zH,
+      zone.style.backgroundSize, zone.style.backgroundPosition
+    );
+    console.log('[overlayOriginalImages] Draw rect: dx=', dx, 'dy=', dy, 'drawW=', drawW, 'drawH=', drawH);
+    
+    const clipX = Math.round(relX * scale);
+    const clipY = Math.round(relY * scale);
+    const clipW = Math.round(zW * scale);
+    const clipH = Math.round(zH * scale);
+    console.log('[overlayOriginalImages] Canvas clip:', clipX, clipY, clipW, clipH, 'scale:', scale);
+    
+    /* Calculate the actual draw position on canvas */
+    const drawX = Math.round((relX + dx) * scale);
+    const drawY = Math.round((relY + dy) * scale);
+    const finalDrawW = Math.round(drawW * scale);
+    const finalDrawH = Math.round(drawH * scale);
+    console.log('[overlayOriginalImages] Will draw at:', drawX, drawY, 'size:', finalDrawW, finalDrawH);
+    
+    /* Draw the high-quality image */
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(clipX, clipY, clipW, clipH);
+    ctx.clip();
+    
+    ctx.drawImage(img, drawX, drawY, finalDrawW, finalDrawH);
+    console.log('[overlayOriginalImages] Image drawn');
+    ctx.restore();
+  }
+  console.log('[overlayOriginalImages] Done');
 }
 
 async function downloadCanvasAsPng(canvas, filename){
@@ -760,6 +897,8 @@ function setImage(key,src){
   zone.style.backgroundImage=`url(${src})`;
   zone.style.backgroundSize='cover';
   zone.style.backgroundPosition='calc(50% + 0px) calc(50% + 0px)';
+  /* Pre-cache image for high-quality export */
+  loadImage(src).then(img => { _imageCache[src] = img; }).catch(()=>{});
   buildImgControls(zone,key);
 }
 
@@ -1013,6 +1152,42 @@ async function downloadOne(idx,theme){
   ictrs.forEach(c=>{c.style.opacity='0';c.style.pointerEvents='none';});
   rhs.forEach(r=>{r.style.display='none';});
   mhs.forEach(m=>{m.style.display='none';});
+  
+  /* Convert background images to <img> elements for high-quality rendering */
+  const zonesWithBg = page.querySelectorAll('.img-zone[data-has-bg]');
+  const imgReplacements = [];
+  zonesWithBg.forEach(zone => {
+    const bgUrl = parseBgUrl(zone.style.backgroundImage);
+    if (!bgUrl) return;
+    
+    /* Create an <img> element to replace the background */
+    const img = document.createElement('img');
+    img.src = bgUrl;
+    img.style.position = 'absolute';
+    img.style.top = '0';
+    img.style.left = '0';
+    img.style.width = '100%';
+    img.style.height = '100%';
+    img.style.objectFit = zone.style.backgroundSize === 'contain' ? 'contain' : 'cover';
+    img.style.objectPosition = 'center';
+    img.style.zIndex = '1';
+    img.style.pointerEvents = 'none';
+    
+    /* Store original background for restoration */
+    imgReplacements.push({
+      zone,
+      bgImage: zone.style.backgroundImage,
+      bgSize: zone.style.backgroundSize,
+      bgPosition: zone.style.backgroundPosition,
+      img
+    });
+    
+    /* Replace background with <img> */
+    zone.style.backgroundImage = 'none';
+    zone.style.position = zone.style.position || 'relative';
+    zone.appendChild(img);
+  });
+  
   try{
     const canvas=await html2canvas(page,{
       scale:exportScale,width:exportWidth,height:exportHeight,useCORS:true,allowTaint:true,backgroundColor:null,logging:false,
@@ -1021,20 +1196,21 @@ async function downloadOne(idx,theme){
           el.style.backdropFilter='none';
           el.style.webkitBackdropFilter='none';
         });
-        doc.querySelectorAll('.img-zone').forEach(z=>{
-          const orig=document.getElementById(z.id);
-          if(orig&&orig.dataset.hasBg){
-            z.style.backgroundImage=orig.style.backgroundImage;
-            z.style.backgroundSize=orig.style.backgroundSize;
-            z.style.backgroundPosition=orig.style.backgroundPosition;
-          }
-        });
       }
     });
+    
     const themeLabel=theme==='light'?'浅色':'深色';
     await downloadCanvasAsPng(canvas, idx===0?`${themeLabel}-封面.png`:`${themeLabel}-第${idx}页.png`);
   }catch(err){alert('下载失败: '+err.message);}
   finally{
+    /* Restore original background images */
+    imgReplacements.forEach(({zone, bgImage, bgSize, bgPosition, img}) => {
+      zone.style.backgroundImage = bgImage;
+      zone.style.backgroundSize = bgSize;
+      zone.style.backgroundPosition = bgPosition;
+      if (img.parentNode) img.parentNode.removeChild(img);
+    });
+    
     btn.style.display='';
     btn.innerHTML=`<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 12l-4-4h2.5V2h3v6H12L8 12zm-5 2h10v-1.5H3V14z"/></svg> 下载`;
     cbs.forEach(b=>{b.style.opacity='';b.style.pointerEvents='';});
