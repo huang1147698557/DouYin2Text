@@ -1,19 +1,19 @@
 services:
   douyin2text:
-    build:
-      context: .
-      args:
-        INSTALL_WHISPER: ${INSTALL_WHISPER:-false}
+    image: huang1147698557/douyin2text:latest
+    pull_policy: always
     container_name: douyin2text
     restart: unless-stopped
     ports:
-      - "${HOST_PORT:-5088}:5088"
+      - "5088:5088"
     environment:
       APP_HOST: 0.0.0.0
-      APP_PORT: 5088
+      APP_PORT: "5088"
       DOUYIN2TEXT_CONFIG_PATH: /data/config.json
       DOUYIN2TEXT_WEB_OUTPUT_DIR: /data/output/web
       XDG_CACHE_HOME: /data/.cache
-      ARK_API_KEY: ${ARK_API_KEY:-}
+      ARK_API_KEY: ""
+      DOUYIN_PARSER_BASE_URL: ""
+      DOUYIN_PARSER_API_KEY: ""
     volumes:
       - ./docker-data:/data

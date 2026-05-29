@@ -139,7 +139,7 @@ cp config.example.json docker-data/config.json
 docker-data/config.json
 ```
 
-至少填好火山引擎凭证。推荐：
+至少填好火山引擎凭证；如果你要用**抖音链接模式**，再补充 `douyin_parser`。推荐：
 
 ```json
 {
@@ -151,6 +151,10 @@ docker-data/config.json
     "uid": "douyin2text",
     "resource_id": "volc.bigasr.auc_turbo",
     "audio_format": "mp3"
+  },
+  "douyin_parser": {
+    "base_url": "",
+    "api_key": ""
   }
 }
 ```
@@ -159,10 +163,11 @@ docker-data/config.json
 
 #### 方案 A：普通 NAS，优先火山模型（推荐）
 
-不安装 Whisper，镜像更小、构建更快：
+直接拉取 Docker Hub 预构建镜像，不安装 Whisper，镜像更小、启动更快：
 
 ```bash
-docker compose up -d --build
+docker compose pull
+docker compose up -d
 ```
 
 默认访问地址：
@@ -173,10 +178,10 @@ http://NAS-IP:5088
 
 #### 方案 B：需要本地 Whisper
 
-如果 NAS 性能足够，启动前加构建参数：
+Docker Hub 默认镜像不包含 Whisper。如果 NAS 性能足够，需要你在源码目录本地构建：
 
 ```bash
-INSTALL_WHISPER=true docker compose up -d --build
+docker build --build-arg INSTALL_WHISPER=true -t douyin2text:whisper .
 ```
 
 ### 4. 常用命令
@@ -191,8 +196,9 @@ docker compose restart
 # 停止
 docker compose down
 
-# 重新构建并启动
-docker compose up -d --build
+# 拉取最新镜像并启动
+docker compose pull
+docker compose up -d
 ```
 
 ### 5. 在群晖 / 威联通图形界面里怎么填
@@ -201,13 +207,15 @@ docker compose up -d --build
 
 | 项目 | 建议值 |
 |------|--------|
-| 镜像构建目录 | 当前项目根目录 |
+| 镜像名称 | `huang1147698557/douyin2text:latest` |
 | 端口映射 | `5088:5088` |
 | 环境变量 `APP_HOST` | `0.0.0.0` |
 | 环境变量 `APP_PORT` | `5088` |
 | 环境变量 `DOUYIN2TEXT_CONFIG_PATH` | `/data/config.json` |
 | 环境变量 `DOUYIN2TEXT_WEB_OUTPUT_DIR` | `/data/output/web` |
 | 环境变量 `XDG_CACHE_HOME` | `/data/.cache` |
+| 环境变量 `DOUYIN_PARSER_BASE_URL` | 你的抖音解析服务地址（链接模式必填） |
+| 环境变量 `DOUYIN_PARSER_API_KEY` | 你的抖音解析服务密钥（链接模式必填） |
 | 卷映射 | NAS 宿主机目录映射到容器 `/data` |
 | 重启策略 | `unless-stopped` |
 
@@ -215,7 +223,8 @@ docker compose up -d --build
 
 1. `app.py` 支持通过环境变量设置 `APP_HOST` / `APP_PORT`，容器内可直接对外监听。  
 2. `app.py` 和 `douyin2text.py` 支持通过环境变量指定配置文件和输出目录路径，方便挂载 NAS 持久化目录。  
-3. 新增 `Dockerfile`、`docker-compose.yml`、`.dockerignore`，避免把本地 `config.json` 和输出文件打进镜像。  
+3. 新增 `Dockerfile`、`docker-compose.yml`、`.dockerignore`，避免把本地 `config.json`、输出目录和无关文件打进镜像。  
+4. 把抖音解析服务改成从环境变量 / `config.json` 读取，避免把敏感密钥写进公开镜像。  
 
 ### 7. NAS 部署注意事项
 
@@ -229,12 +238,14 @@ docker compose up -d --build
 - **端口被占用**：修改 `app.py` 最后一行的 `port=5088` 为其他端口号。
 - **端口被占用**：换一个端口启动，例如 `APP_PORT=5090 python3 app.py`，或在 `docker-compose.yml` 中修改 `HOST_PORT`。
 - **ASR 识别失败**：检查 `config.json` 中火山引擎凭证是否正确，或在页面里切换为 Whisper 本地模型。
+- **抖音链接解析失败**：检查 `DOUYIN_PARSER_BASE_URL` / `DOUYIN_PARSER_API_KEY`，或 `config.json` 中 `douyin_parser` 配置是否正确。
 - **视频上传失败**：确保 `ffmpeg` 已正确安装并可执行。
 
 ## 快速使用
 
 ```bash
 # 先在 config.json 填入火山引擎 ASR 凭证
+# 若要使用抖音链接模式，再配置 douyin_parser 或对应环境变量
 # 若 provider=auto，则链接模式优先用火山引擎，失败时回退 Whisper
 
 # 抖音链接模式
@@ -259,6 +270,10 @@ python3 douyin2text.py "https://v.douyin.com/ixxxxxx/" --json
 
 ```json
 {
+  "douyin_parser": {
+    "base_url": "https://your-parser-service.example.com",
+    "api_key": ""
+  },
   "volcengine_asr": {
     "provider": "auto",
     "app_id": "",
@@ -302,9 +317,9 @@ python3 douyin2text.py "https://v.douyin.com/ixxxxxx/" --json
 | `--json` | 以 JSON 格式输出完整结果 | 否 |
 | `--stdin` | 从标准输入读取视频数据流 | 否 |
 
-## MCP 服务
+## 抖音解析服务
 
-- **端点**：`http://16tufi081507.vicp.fun:8086/mcp?key=763b0781bd293135b391347ebb83c7a9`
+- **配置方式**：优先读取环境变量 `DOUYIN_PARSER_BASE_URL` / `DOUYIN_PARSER_API_KEY`，否则读取 `config.json` 的 `douyin_parser`
 - **协议**：MCP Streamable HTTP（2024-11-05）
 - **使用工具**：`mcp_parse_video_api_mcp_parse_get`
 - **实现策略**：先按 MCP `initialize -> tools/list -> tools/call` 调用；若服务端返回未登录/未授权，则自动回退到同服务提供的 `/api/mcp/parse`

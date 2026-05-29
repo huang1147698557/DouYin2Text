@@ -74,7 +74,6 @@
                   <span>识别引擎</span>
                   <select name="asr_provider" id="asrProviderSelect">
                     <option value="volcengine" selected>火山模型</option>
-                    <option value="whisper">Whisper</option>
                   </select>
                 </label>
 
@@ -105,7 +104,7 @@
           <ul class="tips">
             <li>链接模式支持整段分享文案，系统会自动抽取其中的抖音链接。</li>
             <li>上传模式适合本地视频或二次剪辑素材。</li>
-            <li>识别引擎可以手动切换为火山模型或 Whisper。</li>
+                <li>当前 Web 端使用火山模型进行识别。</li>
             <li>结果区保留原始文案、视频元数据和识别全文。</li>
           </ul>
         </aside>
@@ -186,8 +185,12 @@
           <input type="text" id="tokenInput" name="access_token" placeholder="请输入 Access Token" />
         </div>
         <div class="setting-group">
+          <label for="secretKeyInput">Secret Key</label>
+          <input type="text" id="secretKeyInput" name="secret_key" placeholder="旧版控制台请填写 Secret Key" />
+        </div>
+        <div class="setting-group">
           <label for="apiKeyInput">API Key</label>
-          <input type="text" id="apiKeyInput" name="api_key" placeholder="请输入 API Key" />
+          <input type="text" id="apiKeyInput" name="api_key" placeholder="新版控制台请填写 API Key" />
         </div>
         <div class="setting-group">
           <label for="uidInput">UID</label>

@@ -23,16 +23,12 @@ import urllib.request
 from typing import Optional
 
 # ── 服务配置 ──────────────────────────────────────────────────────────────────
-BASE_URL  = "http://16tufi081507.vicp.fun:8086"
-API_KEY   = "763b0781bd293135b391347ebb83c7a9"
-MCP_ENDPOINT = f"{BASE_URL}/mcp?key={API_KEY}"
 VOLCENGINE_FLASH_URL = "https://openspeech.bytedance.com/api/v3/auc/bigmodel/recognize/flash"
 DEFAULT_CONFIG_PATH = Path(__file__).with_name("config.json")
 CONFIG_PATH = Path(
     os.environ.get("DOUYIN2TEXT_CONFIG_PATH", str(DEFAULT_CONFIG_PATH))
 ).expanduser()
-WHISPER_MODEL_CHOICES = ("tiny", "base", "small", "medium", "large")
-SUPPORTED_ASR_PROVIDERS = {"auto", "volcengine", "whisper"}
+SUPPORTED_ASR_PROVIDERS = {"auto", "volcengine"}
 
 # ── MCP 客户端（优先走 MCP，必要时回退 REST）──────────────────────────────────
 
@@ -109,12 +105,39 @@ def load_config() -> dict:
         return json.load(f)
 
 
+def get_parser_service_settings() -> tuple[str, str]:
+    config = load_config()
+    parser_config = config.get("douyin_parser") or {}
+    if not isinstance(parser_config, dict):
+        raise RuntimeError(f"{CONFIG_PATH.name} 中 douyin_parser 必须是对象。")
+
+    base_url = (
+        os.environ.get("DOUYIN_PARSER_BASE_URL")
+        or parser_config.get("base_url")
+        or ""
+    ).strip().rstrip("/")
+    api_key = (
+        os.environ.get("DOUYIN_PARSER_API_KEY")
+        or parser_config.get("api_key")
+        or ""
+    ).strip()
+
+    if not base_url or not api_key:
+        raise RuntimeError(
+            "未找到抖音解析服务配置，请通过环境变量 DOUYIN_PARSER_BASE_URL / "
+            f"DOUYIN_PARSER_API_KEY，或在 {CONFIG_PATH.name} 的 douyin_parser 中配置 "
+            "base_url / api_key。"
+        )
+
+    return base_url, api_key
+
+
 def get_volcengine_config() -> dict:
     config = load_config()
     return config.get("volcengine_asr", {})
 
 
-def normalize_asr_provider(provider: Optional[str], default: str = "auto") -> str:
+def normalize_asr_provider(provider: Optional[str], default: str = "volcengine") -> str:
     value = (provider or "").strip().lower()
     if value in SUPPORTED_ASR_PROVIDERS:
         return value
@@ -300,7 +323,9 @@ def _parse_text_response(text: str) -> dict:
 
 def parse_douyin_url_via_mcp(url: str) -> dict:
     """按 MCP 协议握手并调用工具；如果工具返回未授权，则交给上层回退。"""
-    client = MCPClient(MCP_ENDPOINT)
+    base_url, api_key = get_parser_service_settings()
+    mcp_endpoint = f"{base_url}/mcp?key={urllib.parse.quote(api_key, safe='')}"
+    client = MCPClient(mcp_endpoint)
     client.initialize()
     tools = client.list_tools()
     tool_names = {tool.get("name", "") for tool in tools}
@@ -336,10 +361,11 @@ def parse_douyin_url_via_rest(url: str) -> dict:
     端点: GET /api/mcp/parse?key=<KEY>&url=<URL>
     返回包含 title / author / video_url / cover 等字段的字典。
     """
-    api_url = f"{BASE_URL}/api/mcp/parse"
+    base_url, api_key = get_parser_service_settings()
+    api_url = f"{base_url}/api/mcp/parse"
     resp = requests.get(
         api_url,
-        params={"key": API_KEY, "url": url},
+        params={"key": api_key, "url": url},
         timeout=30,
     )
     resp.raise_for_status()
@@ -495,20 +521,6 @@ def extract_share_url(text: str) -> str:
 
 # ── ASR (Whisper 语音识别) ────────────────────────────────────────────────────
 
-def extract_audio(video_path: str, audio_path: str) -> bool:
-    """用 ffmpeg 从视频中提取音频（16kHz 单声道 WAV）。"""
-    cmd = [
-        "ffmpeg", "-y", "-i", video_path,
-        "-vn", "-ar", "16000", "-ac", "1", "-f", "wav",
-        audio_path,
-    ]
-    result = subprocess.run(cmd, capture_output=True, text=True)
-    if result.returncode != 0:
-        print(f"[ffmpeg] 错误: {result.stderr[-500:]}")
-        return False
-    return True
-
-
 def extract_audio_for_volcengine(video_path: str, audio_path: str, audio_format: str = "mp3") -> bool:
     """
     为火山极速版准备较小的音频文件，避免直接上传 wav 体积过大。
@@ -609,77 +621,25 @@ def run_volcengine_asr_flash(video_path: str) -> dict:
             os.unlink(audio_path)
 
 
-def run_whisper_asr(video_path: str, model_name: str = "base") -> dict:
-    """
-    使用 OpenAI Whisper 对视频/音频文件进行语音识别。
-    model_name 可选: tiny / base / small / medium / large
-    """
-    import whisper
-
-    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
-        audio_path = tmp.name
-
-    try:
-        print(f"[ASR] 提取音频中...")
-        if not extract_audio(video_path, audio_path):
-            raise RuntimeError("音频提取失败")
-
-        print(f"[ASR] 加载 Whisper 模型 ({model_name})...")
-        model = whisper.load_model(model_name)
-
-        print("[ASR] 语音识别中，请稍候...")
-        result = model.transcribe(audio_path, language="zh", verbose=False)
-        text = normalize_text_line(result["text"])
-        segments = result.get("segments") or []
-        lines = [
-            normalize_text_line(segment.get("text", ""))
-            for segment in segments
-            if normalize_text_line(segment.get("text", ""))
-        ]
-        if not lines:
-            lines = split_text_into_lines(text)
-
-        paragraphs = build_paragraphs_from_lines(lines)
-        return {
-            "text": "\n".join(lines) if lines else text,
-            "lines": lines,
-            "raw_text": text,
-            "paragraphs": paragraphs,
-        }
-    finally:
-        if os.path.exists(audio_path):
-            os.unlink(audio_path)
-
-
 def run_asr(
     video_path: str,
-    model_name: str = "base",
     provider_override: Optional[str] = None,
 ) -> dict:
     """
-    优先尝试火山引擎极速版文件识别 API。
-    当没有配置或调用失败时，自动回退到 Whisper。
+    仅使用火山引擎极速版文件识别 API。
     """
     cfg = get_volcengine_config()
-    provider = normalize_asr_provider(provider_override, normalize_asr_provider(cfg.get("provider"), "auto"))
-
-    should_try_volc = provider in ("auto", "volcengine")
-    if should_try_volc and has_volcengine_credentials(cfg):
-        try:
-            return run_volcengine_asr_flash(video_path)
-        except Exception as exc:
-            if provider == "volcengine":
-                raise
-            print(f"[ASR] 火山引擎识别失败，回退到 Whisper: {exc}")
-
-    if provider == "volcengine" and not has_volcengine_credentials(cfg):
+    provider = normalize_asr_provider(
+        provider_override,
+        normalize_asr_provider(cfg.get("provider"), "volcengine"),
+    )
+    if provider not in ("auto", "volcengine"):
+        raise RuntimeError("当前版本仅支持火山引擎 ASR。")
+    if not has_volcengine_credentials(cfg):
         raise RuntimeError(
-            f"provider=volcengine 但未在 {CONFIG_PATH.name} 中配置有效凭证。"
+            f"未在 {CONFIG_PATH.name} 中配置有效的火山 ASR 凭证。"
         )
-
-    result = run_whisper_asr(video_path, model_name=model_name)
-    result["provider"] = "whisper"
-    return result
+    return run_volcengine_asr_flash(video_path)
 
 
 def materialize_stdin_stream(output_dir: str) -> str:
@@ -700,13 +660,13 @@ def materialize_stdin_stream(output_dir: str) -> str:
 
 # ── 主流程 ────────────────────────────────────────────────────────────────────
 
-def process_url(url: str, output_dir: str, whisper_model: str, asr_provider: Optional[str] = None) -> dict:
+def process_url(url: str, output_dir: str, asr_provider: Optional[str] = None) -> dict:
     """抖音链接模式：解析 -> 下载视频 -> ASR。"""
     os.makedirs(output_dir, exist_ok=True)
     resolved_url = extract_share_url(url)
     requested_provider = normalize_asr_provider(
         asr_provider,
-        normalize_asr_provider(get_volcengine_config().get("provider"), "auto"),
+        normalize_asr_provider(get_volcengine_config().get("provider"), "volcengine"),
     )
 
     # 1. 解析链接
@@ -740,7 +700,7 @@ def process_url(url: str, output_dir: str, whisper_model: str, asr_provider: Opt
         download_file(cover_url, cover_path, "封面")
 
     # 4. ASR
-    asr_result = run_asr(video_path, model_name=whisper_model, provider_override=asr_provider)
+    asr_result = run_asr(video_path, provider_override=asr_provider)
     video_meta = probe_media_metadata(video_path)
 
     return {
@@ -756,14 +716,13 @@ def process_url(url: str, output_dir: str, whisper_model: str, asr_provider: Opt
         "mcp_transport": meta.get("mcp_transport"),
         "mcp_tool": meta.get("mcp_tool"),
         "requested_asr_provider": requested_provider,
-        "whisper_model": whisper_model if requested_provider == "whisper" else None,
         "asr_provider": asr_result.get("provider"),
         "asr_raw_text": asr_result["raw_text"],
         "meta": meta,
     }
 
 
-def process_video(video_path: str, whisper_model: str, asr_provider: Optional[str] = None) -> dict:
+def process_video(video_path: str, asr_provider: Optional[str] = None) -> dict:
     """本地视频模式：直接 ASR。"""
     if not os.path.isfile(video_path):
         raise FileNotFoundError(f"文件不存在: {video_path}")
@@ -771,9 +730,9 @@ def process_video(video_path: str, whisper_model: str, asr_provider: Optional[st
     print(f"[本地视频] {video_path}")
     requested_provider = normalize_asr_provider(
         asr_provider,
-        normalize_asr_provider(get_volcengine_config().get("provider"), "auto"),
+        normalize_asr_provider(get_volcengine_config().get("provider"), "volcengine"),
     )
-    asr_result = run_asr(video_path, model_name=whisper_model, provider_override=asr_provider)
+    asr_result = run_asr(video_path, provider_override=asr_provider)
     video_meta = probe_media_metadata(video_path)
 
     return {
@@ -781,7 +740,6 @@ def process_video(video_path: str, whisper_model: str, asr_provider: Optional[st
         "video_path": video_path,
         "video_metadata": video_meta,
         "requested_asr_provider": requested_provider,
-        "whisper_model": whisper_model if requested_provider == "whisper" else None,
         "asr_provider": asr_result.get("provider"),
         "asr_raw_text": asr_result["raw_text"],
     }
@@ -819,12 +777,6 @@ def main():
         help="输出目录（链接模式下保存视频和封面），默认 ./output",
     )
     parser.add_argument(
-        "-m", "--model",
-        default="base",
-        choices=list(WHISPER_MODEL_CHOICES),
-        help="Whisper 模型大小（越大越准但越慢），默认 base",
-    )
-    parser.add_argument(
         "--json", action="store_true",
         help="以 JSON 格式输出完整结果"
     )
@@ -842,11 +794,11 @@ def main():
     try:
         if args.stdin or inp == "-":
             stream_path = materialize_stdin_stream(args.output_dir)
-            result = process_video(stream_path, args.model)
+            result = process_video(stream_path)
         elif is_url:
-            result = process_url(inp, args.output_dir, args.model)
+            result = process_url(inp, args.output_dir)
         else:
-            result = process_video(inp, args.model)
+            result = process_video(inp)
 
         if args.json:
             # 排除 meta 中的大字段以便可读

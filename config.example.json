@@ -22,6 +22,10 @@
     "poll_interval_seconds": 2,
     "poll_timeout_seconds": 600
   },
+  "douyin_parser": {
+    "base_url": "",
+    "api_key": ""
+  },
   "liteart_llm": {
     "active_model": "deepseek-v4-pro-260425",
     "api_key": ""

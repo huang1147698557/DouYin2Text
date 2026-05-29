@@ -5,7 +5,15 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+.pytest_cache/
+.mypy_cache/
 output/
 docker-data/
 config.json
 *.log
+.DS_Store
+README.md
+docker-compose.yml
+LiteArt_Card.html
+tsx/
+douyin2text@1.0.0/

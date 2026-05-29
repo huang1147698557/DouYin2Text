@@ -25,7 +25,7 @@ WEB_OUTPUT_DIR = Path(
     os.environ.get("DOUYIN2TEXT_WEB_OUTPUT_DIR", str(BASE_DIR / "output" / "web"))
 ).expanduser()
 CONFIG_PATH = DOUYIN_CONFIG_PATH
-SUPPORTED_ASR_PROVIDERS = {"auto", "volcengine", "whisper"}
+SUPPORTED_ASR_PROVIDERS = {"auto", "volcengine"}
 ARK_API_BASE = "https://ark.cn-beijing.volces.com/api/v3"
 LITEART_MODEL_CATALOG = {
     "deepseek-v4-pro-260425": {
@@ -143,6 +143,7 @@ def get_volcengine_settings(config: dict | None = None) -> dict:
         "provider": normalize_provider(volcengine.get("provider") or config.get("provider"), "auto"),
         "app_id": volcengine.get("app_id") or config.get("app_id", ""),
         "access_token": volcengine.get("access_token") or config.get("access_token", ""),
+        "secret_key": volcengine.get("secret_key") or config.get("secret_key", ""),
         "api_key": volcengine.get("api_key") or config.get("api_key", ""),
         "uid": volcengine.get("uid") or config.get("uid", ""),
     }
@@ -401,7 +402,6 @@ def history():
 @app.post("/api/extract")
 def extract():
     mode = request.form.get("mode", "url").strip()
-    whisper_model = request.form.get("model", "base").strip() or "base"
     requested_asr_provider = normalize_provider(request.form.get("asr_provider"), "auto")
     job_id, job_dir = create_job_dir()
 
@@ -416,7 +416,6 @@ def extract():
             upload.save(input_path)
             result = process_video(
                 str(input_path),
-                whisper_model,
                 requested_asr_provider,
             )
             if not result.get("video_path"):
@@ -428,7 +427,6 @@ def extract():
             result = process_url(
                 raw_input,
                 str(job_dir),
-                whisper_model,
                 requested_asr_provider,
             )
 
@@ -453,6 +451,7 @@ def get_settings():
             "provider": "auto",
             "app_id": "",
             "access_token": "",
+            "secret_key": "",
             "api_key": "",
             "uid": "",
         })
@@ -482,6 +481,7 @@ def save_settings():
             "provider": provider,
             "app_id": data.get("app_id", "").strip(),
             "access_token": data.get("access_token", "").strip(),
+            "secret_key": data.get("secret_key", "").strip(),
             "api_key": data.get("api_key", "").strip(),
             "uid": data.get("uid", "").strip() or "douyin2text",
         })
@@ -491,6 +491,7 @@ def save_settings():
         config["provider"] = volcengine["provider"]
         config["app_id"] = volcengine["app_id"]
         config["access_token"] = volcengine["access_token"]
+        config["secret_key"] = volcengine["secret_key"]
         config["api_key"] = volcengine["api_key"]
         config["uid"] = volcengine["uid"]
 

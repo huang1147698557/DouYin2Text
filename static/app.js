@@ -256,6 +256,7 @@ async function loadSettings() {
     const data = await response.json();
     document.getElementById("appIdInput").value = data.app_id || "";
     document.getElementById("tokenInput").value = data.access_token || "";
+    document.getElementById("secretKeyInput").value = data.secret_key || "";
     document.getElementById("apiKeyInput").value = data.api_key || "";
     document.getElementById("uidInput").value = data.uid || "";
   } catch (error) {
@@ -269,6 +270,7 @@ settingsForm.addEventListener("submit", async (event) => {
   const formData = {
     app_id: document.getElementById("appIdInput").value.trim(),
     access_token: document.getElementById("tokenInput").value.trim(),
+    secret_key: document.getElementById("secretKeyInput").value.trim(),
     api_key: document.getElementById("apiKeyInput").value.trim(),
     uid: document.getElementById("uidInput").value.trim(),
   };
@@ -294,6 +296,7 @@ settingsForm.addEventListener("submit", async (event) => {
 resetSettingsButton.addEventListener("click", () => {
   document.getElementById("appIdInput").value = "";
   document.getElementById("tokenInput").value = "";
+  document.getElementById("secretKeyInput").value = "";
   document.getElementById("apiKeyInput").value = "";
   document.getElementById("uidInput").value = "";
 });
