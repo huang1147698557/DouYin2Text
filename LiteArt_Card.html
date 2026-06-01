@@ -53,8 +53,9 @@ body{font-family:-apple-system,'PingFang SC','Noto Sans SC','Microsoft YaHei',sa
 .pw{display:flex;flex-direction:column;align-items:center;gap:10px;}
 .pw .page-num{font-size:11px;color:#444;letter-spacing:0.8px;}
 .pw-inner{position:relative;}
-.dl-btn{position:absolute;top:10px;right:10px;z-index:200;display:flex;align-items:center;gap:5px;background:rgba(0,0,0,.7);color:#fff;border:1px solid rgba(255,255,255,.15);padding:5px 11px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;backdrop-filter:blur(8px);transition:background .2s;letter-spacing:0.3px;}
-.dl-btn:hover{background:rgba(0,0,0,.9);}
+.dl-btn{position:absolute;top:-12px;right:-12px;z-index:200;display:flex;align-items:center;gap:5px;background:rgba(0,0,0,.85);color:#fff;border:1px solid rgba(255,255,255,.25);padding:6px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;backdrop-filter:blur(8px);transition:opacity .2s,transform .2s;letter-spacing:0.3px;opacity:0;pointer-events:none;}
+.pw:hover .dl-btn{opacity:1;pointer-events:auto;}
+.dl-btn:hover{background:rgba(0,0,0,.95);transform:scale(1.05);}
 .dl-btn svg{width:11px;height:11px;flex-shrink:0;}
 .page{width:375px;min-height:500px;height:auto;position:relative;overflow:visible;flex-shrink:0;}
 [data-editable]{cursor:default;}
@@ -309,7 +310,7 @@ function generate(){
 function createPageWrapper(sec,idx,theme,data){
   const pw=document.createElement('div');pw.className='pw';
   const inner=document.createElement('div');inner.className='pw-inner';
-  const page=buildPage(sec,idx,theme);
+  const page=buildPage(sec,idx,theme,data);
   inner.appendChild(page);
   const dlBtn=document.createElement('button');
   dlBtn.className='dl-btn';dlBtn.id=`dl-${theme}-${idx}`;
@@ -322,21 +323,21 @@ function createPageWrapper(sec,idx,theme,data){
   return pw;
 }
 
-function buildPage(sec,idx,theme){
+function buildPage(sec,idx,theme,data){
   const page=document.createElement('div');
   const isFirst=idx===0;
   if(isFirst){
     page.className=theme==='light'?'page cover-lp':'page cover';
     page.id=`page-${theme}-${idx}`;
-    page.innerHTML=coverHTML(sec,idx,theme);
+    page.innerHTML=coverHTML(sec,idx,theme,data);
   } else if(theme==='dark'){
     page.className='page dp';
     page.id=`page-${theme}-${idx}`;
-    page.innerHTML=darkHTML(sec,idx);
+    page.innerHTML=darkHTML(sec,idx,data);
   } else {
     page.className='page lp';
     page.id=`page-${theme}-${idx}`;
-    page.innerHTML=lightHTML(sec,idx);
+    page.innerHTML=lightHTML(sec,idx,data);
   }
   return page;
 }
@@ -728,7 +729,8 @@ async function downloadOne(idx,theme){
   const exportScale=getExportScale(page);
   const exportWidth=Math.max(page.scrollWidth, page.offsetWidth, 1);
   const exportHeight=Math.max(page.scrollHeight, page.offsetHeight, 1);
-  btn.style.display='none';
+  btn.style.opacity='0';
+  btn.style.pointerEvents='none';
   document.querySelectorAll('[contenteditable="true"]').forEach(exitEdit);
   const cbs=page.querySelectorAll('.change-btn');
   const ictrs=page.querySelectorAll('.img-controls');
@@ -760,7 +762,8 @@ async function downloadOne(idx,theme){
     await downloadCanvasAsPng(canvas, idx===0?`${themeLabel}-封面.png`:`${themeLabel}-第${idx}页.png`);
   }catch(err){alert('下载失败: '+err.message);}
   finally{
-    btn.style.display='';
+    btn.style.opacity='';
+    btn.style.pointerEvents='';
     btn.innerHTML=`<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 12l-4-4h2.5V2h3v6H12L8 12zm-5 2h10v-1.5H3V14z"/></svg> 下载`;
     cbs.forEach(b=>{b.style.opacity='';b.style.pointerEvents='';});
     ictrs.forEach(c=>{c.style.opacity='';c.style.pointerEvents='';});
