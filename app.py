@@ -454,10 +454,26 @@ def get_settings():
             "secret_key": "",
             "api_key": "",
             "uid": "",
+            "douyin_parser_base_url": "",
+            "douyin_parser_api_key": "",
         })
 
     try:
-        return jsonify(get_volcengine_settings())
+        config = load_app_config()
+        volcengine = config.get("volcengine_asr") or {}
+        douyin_parser = config.get("douyin_parser") or {}
+        
+        result = {
+            "provider": volcengine.get("provider", "auto"),
+            "app_id": volcengine.get("app_id", ""),
+            "access_token": volcengine.get("access_token", ""),
+            "secret_key": volcengine.get("secret_key", ""),
+            "api_key": volcengine.get("api_key", ""),
+            "uid": volcengine.get("uid", ""),
+            "douyin_parser_base_url": douyin_parser.get("base_url", ""),
+            "douyin_parser_api_key": douyin_parser.get("api_key", ""),
+        }
+        return jsonify(result)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -486,6 +502,17 @@ def save_settings():
             "uid": data.get("uid", "").strip() or "douyin2text",
         })
         config["volcengine_asr"] = volcengine
+
+        # 保存 douyin_parser 配置
+        douyin_parser = config.get("douyin_parser") or {}
+        if not isinstance(douyin_parser, dict):
+            douyin_parser = {}
+        
+        douyin_parser.update({
+            "base_url": data.get("douyin_parser_base_url", "").strip(),
+            "api_key": data.get("douyin_parser_api_key", "").strip(),
+        })
+        config["douyin_parser"] = douyin_parser
 
         # 兼容旧版顶层字段，同时保证 CLI 读取的嵌套配置保持一致。
         config["provider"] = volcengine["provider"]

@@ -3,3 +3,4 @@ __pycache__/
 output/
 config.json
 .DS_Store
+.idea

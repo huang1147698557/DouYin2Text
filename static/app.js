@@ -259,6 +259,8 @@ async function loadSettings() {
     document.getElementById("secretKeyInput").value = data.secret_key || "";
     document.getElementById("apiKeyInput").value = data.api_key || "";
     document.getElementById("uidInput").value = data.uid || "";
+    document.getElementById("douyinParserUrlInput").value = data.douyin_parser_base_url || "";
+    document.getElementById("douyinParserKeyInput").value = data.douyin_parser_api_key || "";
   } catch (error) {
     console.error("Failed to load settings:", error);
   }
@@ -273,6 +275,8 @@ settingsForm.addEventListener("submit", async (event) => {
     secret_key: document.getElementById("secretKeyInput").value.trim(),
     api_key: document.getElementById("apiKeyInput").value.trim(),
     uid: document.getElementById("uidInput").value.trim(),
+    douyin_parser_base_url: document.getElementById("douyinParserUrlInput").value.trim(),
+    douyin_parser_api_key: document.getElementById("douyinParserKeyInput").value.trim(),
   };
   
   try {
