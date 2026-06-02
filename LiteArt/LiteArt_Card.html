@@ -16,6 +16,33 @@
   --fs-title:27px;
   --fs-sub:12.5px;
   --fs-body:11.5px;
+  --theme-font-body:inherit;
+  --theme-font-display:inherit;
+  --theme-page-shadow:0 18px 40px rgba(0,0,0,.18);
+  --theme-page-radius:22px;
+  --theme-card-radius:15px;
+  --theme-image-radius:10px;
+  --badge-radius:5px;
+  --panel-heading:#eadbc0;
+  --panel-subheading:#8d7c68;
+  --panel-shell-bg:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));
+  --light-title:#111;
+  --light-sub:#333;
+  --light-body:#555;
+  --light-divider:#d0c8be;
+  --light-surface:#e8dcd0;
+  --light-placeholder:#aaa;
+  --light-placeholder-border:#c8bfae;
+  --light-tag-bg:#f0e8d8;
+  --light-cover-title:#1a1208;
+  --light-cover-sub:#8a7f6e;
+  --light-cover-body:#736858;
+  --dark-sub:#ddd0bb;
+  --dark-body:#b0997e;
+  --dark-surface:#201910;
+  --dark-placeholder:#503d28;
+  --dark-cover-sub:#8f816c;
+  --dark-cover-body:#6b6258;
 }
 body{font-family:-apple-system,'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif;background:#111;color:#fff;min-height:100vh;display:flex;}
 .sidebar{width:290px;min-width:290px;background:#161616;border-right:1px solid #242424;display:flex;flex-direction:column;padding:28px 20px;gap:14px;height:100vh;position:sticky;top:0;overflow-y:auto;}
@@ -61,12 +88,25 @@ body{font-family:-apple-system,'PingFang SC','Noto Sans SC','Microsoft YaHei',sa
 .llm-field select,.llm-field input{width:100%;background:#100d09;border:1px solid #2b261f;border-radius:10px;color:#ebdcc0;padding:11px 12px;font-size:13px;outline:none;}
 .llm-field select:focus,.llm-field input:focus{border-color:rgba(201,169,110,.65);box-shadow:0 0 0 3px rgba(201,169,110,.12);}
 .llm-actions{display:flex;justify-content:flex-end;gap:10px;}
-.dual-columns{display:flex;gap:48px;justify-content:center;}
-.theme-column{display:flex;flex-direction:column;gap:28px;}
-.column-header{display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;border-bottom:1px solid #222;}
-.column-header h3{font-size:13px;font-weight:700;letter-spacing:0.5px;}
-.column-header h3.light-title{color:#d4c8b4;}
-.column-header h3.dark-title{color:#888;}
+.theme-workspace{display:flex;justify-content:center;}
+.theme-stage{width:min(100%,470px);display:flex;flex-direction:column;gap:18px;}
+.theme-stage-head{display:flex;flex-direction:column;gap:12px;}
+.theme-stage-copy{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;}
+.theme-stage-copy .stage-title{font-size:12px;color:#5e564a;letter-spacing:1.4px;text-transform:uppercase;font-weight:700;}
+.theme-stage-copy .stage-sub{font-size:11px;color:#433d35;line-height:1.6;}
+.theme-tabs{display:flex;flex-wrap:wrap;gap:10px;}
+.theme-tab{border:none;display:inline-flex;align-items:center;gap:7px;padding:10px 14px;border-radius:999px;background:#181818;color:#8f877a;border:1px solid #2c2c2c;font-size:12px;font-weight:700;cursor:pointer;transition:background .18s,color .18s,border-color .18s,transform .18s;letter-spacing:.2px;}
+.theme-tab:hover{background:#212121;color:#d7c8ad;border-color:#3b3327;}
+.theme-tab.active{background:rgba(201,169,110,.18);color:#f2dec0;border-color:rgba(201,169,110,.45);box-shadow:0 8px 20px rgba(0,0,0,.18);}
+.theme-tab .tab-icon{font-size:13px;line-height:1;}
+.theme-panels{width:100%;}
+.theme-panel{display:none;flex-direction:column;gap:18px;padding:18px;border-radius:24px;border:1px solid rgba(255,255,255,.06);background:var(--panel-shell-bg);box-shadow:0 22px 48px rgba(0,0,0,.22);}
+.theme-panel.active{display:flex;}
+.theme-column{display:flex;flex-direction:column;gap:18px;width:100%;}
+.column-header{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;}
+.column-header-copy{display:flex;flex-direction:column;gap:4px;}
+.column-header h3{font-size:16px;font-weight:800;letter-spacing:0.2px;color:var(--panel-heading);}
+.column-header p{font-size:11px;color:var(--panel-subheading);line-height:1.6;max-width:260px;}
 .col-dl-btn{background:rgba(201,169,110,.15);color:var(--gold);border:1px solid rgba(201,169,110,.3);padding:7px 16px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:background .2s;letter-spacing:0.3px;}
 .col-dl-btn:hover{background:rgba(201,169,110,.3);}
 .pages-col{display:flex;flex-direction:column;gap:28px;align-items:center;}
@@ -77,7 +117,7 @@ body{font-family:-apple-system,'PingFang SC','Noto Sans SC','Microsoft YaHei',sa
 .pw:hover .dl-btn{opacity:1;pointer-events:auto;}
 .dl-btn:hover{background:rgba(0,0,0,.95);transform:scale(1.05);}
 .dl-btn svg{width:11px;height:11px;flex-shrink:0;}
-.page{width:375px;min-height:500px;height:auto;position:relative;overflow:visible;flex-shrink:0;}
+.page{width:375px;min-height:500px;height:auto;position:relative;overflow:visible;flex-shrink:0;font-family:var(--theme-font-body);border-radius:var(--theme-page-radius);box-shadow:var(--theme-page-shadow);}
 [data-editable]{cursor:default;}
 [data-editable]:hover{outline:1.5px dashed rgba(201,169,110,.4);outline-offset:2px;border-radius:3px;}
 [data-editable][contenteditable=true]{outline:1.5px solid var(--gold)!important;outline-offset:2px;border-radius:3px;cursor:text;overflow:visible!important;line-clamp:unset!important;-webkit-line-clamp:unset!important;}
@@ -115,58 +155,69 @@ body{font-family:-apple-system,'PingFang SC','Noto Sans SC','Microsoft YaHei',sa
 .move-handle.mh-light:hover::before,.move-handle.mh-light.active::before{background:#6cb4ee;box-shadow:0 4px 0 #6cb4ee;}
 .page.cover{background:var(--dark-bg);}
 .page.cover-lp{background:var(--light-card);}
-.cover-photo{width:100%;height:280px;background:#201910;}
-.cover-lp .cover-photo{background:#e8dcd0;}
+.cover-photo{width:100%;height:280px;background:var(--dark-surface);border-radius:var(--theme-page-radius) var(--theme-page-radius) 0 0;}
+.cover-lp .cover-photo{background:var(--light-surface);}
 .cover-photo .imgph .up-icon{width:44px;height:44px;border:1.5px dashed #333;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#333;}
-.cover-lp .cover-photo .imgph .up-icon{border-color:#c8bfae;color:#b8ad98;}
+.cover-lp .cover-photo .imgph .up-icon{border-color:var(--light-placeholder-border);color:var(--light-placeholder);}
 .cover-photo .imgph span{font-size:12px;color:#444;}
-.cover-lp .cover-photo .imgph span{color:#b8ad98;}
+.cover-lp .cover-photo .imgph span{color:var(--light-placeholder);}
 .cover-text{min-height:220px;height:auto;padding:18px 24px 14px;background:var(--dark-bg);display:flex;flex-direction:column;justify-content:flex-start;}
 .cover-lp .cover-text{background:var(--light-card);}
 .cover-tag{display:inline-flex;align-items:center;background:#1e1e1e;border-radius:20px;padding:3px 12px 4px;font-size:11px;color:var(--gold);margin-bottom:10px;align-self:flex-start;letter-spacing:0.3px;}
-.cover-lp .cover-tag{background:#f0e8d8;}
-.cover-title{font-size:var(--fs-title);font-weight:900;color:#fff;line-height:1.3;letter-spacing:-0.5px;margin-bottom:5px;}
+.cover-lp .cover-tag{background:var(--light-tag-bg);}
+.cover-title{font-size:var(--fs-title);font-weight:900;color:#fff;line-height:1.3;letter-spacing:-0.5px;margin-bottom:5px;font-family:var(--theme-font-display);}
 .cover-title .g{color:var(--gold);}
-.cover-lp .cover-title{color:#1a1208;}
-.cover-sub{font-size:var(--fs-sub);color:#8f816c;line-height:1.55;margin-top:2px;margin-bottom:8px;}
-.cover-lp .cover-sub{color:#8a7f6e;}
-.cover-body{font-size:var(--fs-body);color:#6b6258;line-height:1.78;white-space:normal;word-break:break-word;overflow:visible;}
-.cover-lp .cover-body{color:#736858;}
+.cover-lp .cover-title{color:var(--light-cover-title);}
+.cover-sub{font-size:var(--fs-sub);color:var(--dark-cover-sub);line-height:1.55;margin-top:2px;margin-bottom:8px;}
+.cover-lp .cover-sub{color:var(--light-cover-sub);}
+.cover-body{font-size:var(--fs-body);color:var(--dark-cover-body);line-height:1.78;white-space:normal;word-break:break-word;overflow:visible;}
+.cover-lp .cover-body{color:var(--light-cover-body);}
 .page.dp{background:var(--dark-bg);display:flex;flex-direction:column;}
 .dp .cat{position:absolute;top:15px;left:15px;font-size:10.5px;color:var(--gold);font-weight:600;letter-spacing:0.5px;z-index:2;}
 .dp .dp-content{padding:38px 16px 0;flex-shrink:0;}
-.dp .badge{display:inline-flex;align-items:center;background:var(--gold);color:#1a0800;border-radius:5px;padding:2px 10px 3px;font-size:11px;font-weight:800;margin-bottom:7px;letter-spacing:0.2px;}
-.dp .ftitle{font-size:var(--fs-title);font-weight:900;color:#fff;line-height:1.25;margin-bottom:5px;display:-webkit-box;line-clamp:2;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-.dp .fsub{font-size:var(--fs-sub);font-weight:600;color:#ddd0bb;line-height:1.55;margin-bottom:10px;display:-webkit-box;line-clamp:2;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.dp .badge{display:inline-flex;align-items:center;background:var(--gold);color:#1a0800;border-radius:var(--badge-radius);padding:2px 10px 3px;font-size:11px;font-weight:800;margin-bottom:7px;letter-spacing:0.2px;}
+.dp .ftitle{font-size:var(--fs-title);font-weight:900;color:#fff;line-height:1.25;margin-bottom:5px;display:-webkit-box;line-clamp:2;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-family:var(--theme-font-display);}
+.dp .fsub{font-size:var(--fs-sub);font-weight:600;color:var(--dark-sub);line-height:1.55;margin-bottom:10px;display:-webkit-box;line-clamp:2;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
 .dp .dbox{background:var(--dark-box);border-radius:9px;padding:11px 13px;}
-.dp .dbox p{font-size:var(--fs-body);color:#b0997e;line-height:1.78;white-space:normal;word-break:break-word;overflow:visible;}
-.dp .imgzone{margin:10px 10px 10px;border-radius:10px;overflow:hidden;position:relative;height:280px;overflow-y:clip;}
-.dp .imgzone .imgph{background:#201910;}
+.dp .dbox p{font-size:var(--fs-body);color:var(--dark-body);line-height:1.78;white-space:normal;word-break:break-word;overflow:visible;}
+.dp .imgzone{margin:10px 10px 10px;border-radius:var(--theme-image-radius);overflow:hidden;position:relative;height:280px;overflow-y:clip;}
+.dp .imgzone .imgph{background:var(--dark-surface);}
 .dp .imgzone .imgph .icon{font-size:26px;opacity:.35;}
-.dp .imgzone .imgph span{font-size:11px;color:#503d28;}
+.dp .imgzone .imgph span{font-size:11px;color:var(--dark-placeholder);}
 .page.lp{background:#0d0d0d;}
 .lp .cat{position:absolute;top:12px;left:14px;font-size:10.5px;color:var(--gold);font-weight:600;letter-spacing:0.5px;}
-.lp .card{position:relative;margin:28px 10px 10px;background:var(--light-card);border-radius:15px;overflow:visible;display:flex;flex-direction:column;min-height:462px;}
+.lp .card{position:relative;margin:28px 10px 10px;background:var(--light-card);border-radius:var(--theme-card-radius);overflow:visible;display:flex;flex-direction:column;min-height:462px;}
 .lp .card-top{padding:15px 15px 0;flex-shrink:0;}
 .lp .badge-row{display:flex;align-items:center;gap:7px;margin-bottom:5px;flex-wrap:nowrap;}
-.lp .badge{display:inline-flex;align-items:center;background:var(--gold);color:#1a0800;border-radius:5px;padding:2px 9px 3px;font-size:11px;font-weight:800;white-space:nowrap;flex-shrink:0;letter-spacing:0.2px;}
-.lp .ftitle{font-size:calc(var(--fs-title) - 6px);font-weight:900;color:#111;line-height:1.25;display:-webkit-box;line-clamp:2;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-.lp .fsub{font-size:var(--fs-sub);font-weight:600;color:#333;line-height:1.55;margin:5px 0 7px;display:-webkit-box;line-clamp:2;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-.lp .divider{border:none;border-top:1.5px dashed #d0c8be;margin:4px 0 8px;}
-.lp .dtext{font-size:var(--fs-body);color:#555;line-height:1.78;white-space:normal;word-break:break-word;overflow:visible;}
-.lp .card-img{margin:8px 10px 10px;border-radius:10px;overflow:hidden;position:relative;background:#e8dcd0;height:230px;overflow-y:clip;}
+.lp .badge{display:inline-flex;align-items:center;background:var(--gold);color:#1a0800;border-radius:var(--badge-radius);padding:2px 9px 3px;font-size:11px;font-weight:800;white-space:nowrap;flex-shrink:0;letter-spacing:0.2px;}
+.lp .ftitle{font-size:calc(var(--fs-title) - 6px);font-weight:900;color:var(--light-title);line-height:1.25;display:-webkit-box;line-clamp:2;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-family:var(--theme-font-display);}
+.lp .fsub{font-size:var(--fs-sub);font-weight:600;color:var(--light-sub);line-height:1.55;margin:5px 0 7px;display:-webkit-box;line-clamp:2;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.lp .divider{border:none;border-top:1.5px dashed var(--light-divider);margin:4px 0 8px;}
+.lp .dtext{font-size:var(--fs-body);color:var(--light-body);line-height:1.78;white-space:normal;word-break:break-word;overflow:visible;}
+.lp .card-img{margin:8px 10px 10px;border-radius:var(--theme-image-radius);overflow:hidden;position:relative;background:var(--light-surface);height:230px;overflow-y:clip;}
 .lp .card-img .imgph .icon{font-size:26px;opacity:.3;}
-.lp .card-img .imgph span{font-size:11px;color:#aaa;}
+.lp .card-img .imgph span{font-size:11px;color:var(--light-placeholder);}
 .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:400px;color:#333;gap:12px;width:100%;}
 .empty-state .big{font-size:40px;}
 .empty-state p{font-size:13px;line-height:1.7;text-align:center;max-width:300px;}
-@media (max-width:1080px){body{flex-direction:column;}.sidebar{width:100%;min-width:0;height:auto;position:relative;border-right:none;border-bottom:1px solid #242424;}.main{padding:24px 18px 40px;}.main-header{flex-direction:column;align-items:stretch;}.header-tools{align-items:stretch;}.header-tools-row{justify-content:flex-start;}.llm-panel{position:relative;top:auto;right:auto;width:100%;}}
+.theme-panel[data-theme="light"]{--panel-shell-bg:linear-gradient(180deg,rgba(243,232,212,.08),rgba(255,255,255,.02));}
+.theme-panel[data-theme="dark"]{--panel-shell-bg:linear-gradient(180deg,rgba(63,46,28,.28),rgba(15,12,8,.88));--panel-heading:#e5d5bb;--panel-subheading:#998870;}
+.theme-panel[data-theme="ios"]{--gold:#4c86ff;--light-card:rgba(249,251,255,.94);--light-surface:#dfe8f6;--light-title:#18243c;--light-sub:#4f627d;--light-body:#5b6f8b;--light-divider:#cdd8e7;--light-placeholder:#8da2bd;--light-placeholder-border:#b9c7db;--light-tag-bg:rgba(76,134,255,.12);--light-cover-title:#15223c;--light-cover-sub:#647691;--light-cover-body:#6c7f98;--theme-card-radius:24px;--theme-image-radius:20px;--theme-page-shadow:0 28px 54px rgba(40,72,122,.18);--panel-shell-bg:linear-gradient(180deg,rgba(196,214,242,.18),rgba(18,23,32,.4));--panel-heading:#e4edff;--panel-subheading:#97abc9;--theme-font-display:"SF Pro Display","PingFang SC",sans-serif;}
+.theme-panel[data-theme="wechat"]{--gold:#1aad19;--light-card:#fffdf9;--light-surface:#edf6ec;--light-title:#1b281b;--light-sub:#4f614f;--light-body:#536053;--light-divider:#d6e5d6;--light-placeholder:#8ea18e;--light-placeholder-border:#bfd5bf;--light-tag-bg:#ebf7ea;--light-cover-title:#163116;--light-cover-sub:#5e6e5e;--light-cover-body:#5d6b5d;--panel-shell-bg:linear-gradient(180deg,rgba(26,173,25,.11),rgba(16,16,14,.48));--panel-heading:#dff3df;--panel-subheading:#8eb38e;}
+.theme-panel[data-theme="wechat"] .lp .divider{border-top-style:solid;border-top-width:1px;}
+.theme-panel[data-theme="rednote"]{--gold:#ff5f6d;--light-card:#fff7f4;--light-surface:#ffe7df;--light-title:#2b1717;--light-sub:#734c4c;--light-body:#7b5b5b;--light-divider:#f1caca;--light-placeholder:#d09c9c;--light-placeholder-border:#e8bcbc;--light-tag-bg:#fff0eb;--light-cover-title:#311717;--light-cover-sub:#835555;--light-cover-body:#835f5f;--badge-radius:999px;--theme-card-radius:22px;--theme-image-radius:18px;--theme-page-shadow:0 24px 46px rgba(255,95,109,.18);--panel-shell-bg:linear-gradient(180deg,rgba(255,126,137,.14),rgba(24,14,14,.5));--panel-heading:#ffe5e7;--panel-subheading:#d3a2a7;}
+.theme-panel[data-theme="editorial"]{--gold:#111111;--light-card:#f6efe4;--light-surface:#ddd3c4;--light-title:#1c1712;--light-sub:#5d5449;--light-body:#61594f;--light-divider:#b9ad98;--light-placeholder:#857b6f;--light-placeholder-border:#c5b9a7;--light-tag-bg:#ebe1d2;--light-cover-title:#16120d;--light-cover-sub:#655a4c;--light-cover-body:#62584c;--theme-font-display:"Times New Roman","Songti SC",serif;--theme-card-radius:8px;--theme-image-radius:4px;--theme-page-shadow:0 16px 34px rgba(0,0,0,.12);--panel-shell-bg:linear-gradient(180deg,rgba(239,226,204,.16),rgba(29,24,19,.55));--panel-heading:#f5ebdb;--panel-subheading:#bda98e;}
+.theme-panel[data-theme="editorial"] .lp .divider{border-top-style:solid;border-top-width:1px;}
+.theme-panel[data-theme="notion"]{--gold:#2f3437;--light-card:#f7f6f3;--light-surface:#eceae4;--light-title:#242628;--light-sub:#5f6264;--light-body:#595c5e;--light-divider:#d9d5cf;--light-placeholder:#8d8b86;--light-placeholder-border:#d1ccc5;--light-tag-bg:#ebe8e2;--light-cover-title:#242628;--light-cover-sub:#696d70;--light-cover-body:#606366;--theme-card-radius:12px;--theme-image-radius:12px;--theme-page-shadow:0 10px 24px rgba(0,0,0,.12);--panel-shell-bg:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.015));--panel-heading:#f1efea;--panel-subheading:#9a958d;}
+.theme-panel[data-theme="business"]{--gold:#62a8ff;--dark-bg:#0d1a28;--dark-box:#15283b;--dark-surface:#14283b;--dark-sub:#dceaff;--dark-body:#a5bbd2;--dark-placeholder:#5f7e9d;--dark-cover-sub:#9ebfe6;--dark-cover-body:#8ea8c3;--panel-shell-bg:linear-gradient(180deg,rgba(47,88,140,.28),rgba(10,17,27,.88));--panel-heading:#deebff;--panel-subheading:#8fa8c5;--theme-page-shadow:0 26px 50px rgba(7,17,31,.32);}
+.theme-panel[data-theme="business"] .dp .dbox{border:1px solid rgba(98,168,255,.18);}
+@media (max-width:1080px){body{flex-direction:column;}.sidebar{width:100%;min-width:0;height:auto;position:relative;border-right:none;border-bottom:1px solid #242424;}.main{padding:24px 18px 40px;}.main-header{flex-direction:column;align-items:stretch;}.header-tools{align-items:stretch;}.header-tools-row{justify-content:flex-start;}.llm-panel{position:relative;top:auto;right:auto;width:100%;}.theme-stage{width:100%;}.theme-panel{padding:14px;}.theme-stage-copy{align-items:flex-start;}}
 </style>
 </head>
 <body>
 <aside class="sidebar">
   <div class="sidebar-logo"><div class="dot"></div><span>LiteArt</span></div>
-  <p class="hint">输入主题、文章或段落，可先生成固定格式文案，再生成浅色 + 深色两套卡片，每套 1 封面 + 5 页内容。</p>
+  <p class="hint">输入主题、文章或段落，可先生成固定格式文案，再生成 8 套可切换主题卡片。上方 Tab 用来切换预览，图片和文字编辑会分别保留在各个主题里。</p>
   <textarea id="inputText" placeholder="在此输入内容...">800V主动悬架 全线控底盘 L4的起点
 理想L9 LeVIS底盘技术深度解读
 为什么一定要上800V主动悬架？为什么要做完全体线控底盘？这套系统对L4自动驾驶究竟意味着什么？李想与产品线总裁唐静，聊透理想对底盘和悬架的底层思考。
@@ -213,15 +264,14 @@ body{font-family:-apple-system,'PingFang SC','Noto Sans SC','Microsoft YaHei',sa
     </div>
   </div>
   <hr class="divider-line">
-  <button class="btn btn-ghost" onclick="downloadAll('light')">下载浅色全部</button>
-  <button class="btn btn-ghost" onclick="downloadAll('dark')">下载深色全部</button>
+  <button class="btn btn-ghost" id="downloadActiveThemeBtn" onclick="downloadActiveTheme()">下载当前主题</button>
 </aside>
 
 <main class="main">
   <div class="main-header">
     <div class="header-copy">
-      <h2>浅色 6 页 + 深色 6 页 · 共 12 页</h2>
-      <span class="edit-tip">双击文字可编辑 · 点击图片区域上传</span>
+      <h2>8 套主题 · 单列 Tab 预览</h2>
+      <span class="edit-tip">双击文字可编辑 · 点击图片区域上传 · 切换 Tab 不会丢当前主题的编辑状态</span>
     </div>
     <div class="header-tools" id="llmPanelWrap">
       <div class="header-tools-row">
@@ -246,10 +296,10 @@ body{font-family:-apple-system,'PingFang SC','Noto Sans SC','Microsoft YaHei',sa
       </div>
     </div>
   </div>
-  <div class="dual-columns" id="dualColumns">
+  <div class="theme-workspace" id="themeWorkspace">
     <div class="empty-state">
       <div class="big">✦</div>
-      <p>在左侧输入内容，点击「生成卡片」开始创作</p>
+      <p>在左侧输入内容，点击「生成卡片」开始创作，并在上方切换 8 套主题风格</p>
     </div>
   </div>
 </main>
@@ -261,6 +311,8 @@ const BADGES = ['核心观点','深度解析','关键数据','行动建议','风
 const CATEGORIES = ['趋势研判','行业洞察','核心观点','实战指南','风险提示'];
 const inputText = document.getElementById('inputText');
 const statusLine = document.getElementById('statusLine');
+const themeWorkspace = document.getElementById('themeWorkspace');
+const downloadActiveThemeBtn = document.getElementById('downloadActiveThemeBtn');
 const llmPanelWrap = document.getElementById('llmPanelWrap');
 const llmSettingsPanel = document.getElementById('llmSettingsPanel');
 const toggleLlmSettingsBtn = document.getElementById('toggleLlmSettings');
@@ -269,8 +321,44 @@ const llmModelSelect = document.getElementById('llmModelSelect');
 const llmApiKeyInput = document.getElementById('llmApiKeyInput');
 const activeModelLabel = document.getElementById('activeModelLabel');
 const generateCopyBtn = document.getElementById('generateCopyBtn');
+const THEME_CONFIGS = [
+  {id:'light', label:'浅色主题', icon:'☀', family:'light', description:'温暖米白，适合大多数通用内容与封面卡片。', downloadLabel:'浅色主题'},
+  {id:'dark', label:'深色主题', icon:'🌙', family:'dark', description:'深色科技气质，适合汽车、AI、商业洞察内容。', downloadLabel:'深色主题'},
+  {id:'ios', label:'iOS 风格', icon:'◌', family:'light', description:'冷白磨砂和更大圆角，适合产品推荐与效率内容。', downloadLabel:'iOS风格'},
+  {id:'wechat', label:'公众号风格', icon:'✳', family:'light', description:'白底绿点缀，更像公众号头图和文章摘要卡片。', downloadLabel:'公众号风格'},
+  {id:'rednote', label:'小红书风格', icon:'❤', family:'light', description:'暖白轻红、贴纸感更强，适合笔记和种草内容。', downloadLabel:'小红书风格'},
+  {id:'editorial', label:'杂志简报风', icon:'✦', family:'light', description:'版式感更强，适合品牌故事、人物和年度盘点。', downloadLabel:'杂志简报风'},
+  {id:'notion', label:'Notion 极简风', icon:'▣', family:'light', description:'黑白灰极简排版，适合知识卡片和方法论整理。', downloadLabel:'Notion极简风'},
+  {id:'business', label:'商务报告风', icon:'▤', family:'dark', description:'冷蓝商务气质，适合行业、财报和方案解读。', downloadLabel:'商务报告风'},
+];
 
 let llmSettings = {active_model:'',api_key:'',models:[]};
+let activeThemeId = THEME_CONFIGS[0].id;
+
+function getThemeConfig(themeId) {
+  return THEME_CONFIGS.find(theme => theme.id === themeId) || THEME_CONFIGS[0];
+}
+
+function updateActiveThemeDownloadButton() {
+  if (!downloadActiveThemeBtn) return;
+  const theme = getThemeConfig(activeThemeId);
+  downloadActiveThemeBtn.textContent = `下载${theme.label}`;
+}
+
+function switchTheme(themeId) {
+  activeThemeId = getThemeConfig(themeId).id;
+  document.querySelectorAll('.theme-tab').forEach(button => {
+    button.classList.toggle('active', button.dataset.theme === activeThemeId);
+  });
+  document.querySelectorAll('.theme-panel').forEach(panel => {
+    panel.classList.toggle('active', panel.dataset.theme === activeThemeId);
+  });
+  updateActiveThemeDownloadButton();
+}
+
+function downloadActiveTheme() {
+  downloadAll(activeThemeId);
+}
 
 function showStatus(message, tone='muted') {
   statusLine.textContent = message;
@@ -536,39 +624,71 @@ AI 正以前所未有的速度渗透各行各业，从医疗诊断到自动驾�
 function generate(){
   const raw=inputText.value;
   const data=parseInput(raw);
-  const container=document.getElementById('dualColumns');
-  container.innerHTML='';
+  themeWorkspace.innerHTML='';
   document.getElementById('file-inputs').innerHTML='';
   showStatus('卡片已刷新，可继续编辑文字或上传图片。','success');
 
-  /* Build light column */
-  const lightCol=document.createElement('div');lightCol.className='theme-column';
-  lightCol.innerHTML=`<div class="column-header"><h3 class="light-title">☀ 浅色主题</h3><button class="col-dl-btn" onclick="downloadAll('light')">下载全部</button></div>`;
-  const lightPages=document.createElement('div');lightPages.className='pages-col';
-  data.forEach((sec,idx)=>{
-    const pw=createPageWrapper(sec,idx,'light',data);
-    lightPages.appendChild(pw);
-  });
-  lightCol.appendChild(lightPages);
+  const stage=document.createElement('div');
+  stage.className='theme-stage';
+  stage.innerHTML=`
+    <div class="theme-stage-head">
+      <div class="theme-stage-copy">
+        <div class="stage-title">Theme Tabs</div>
+        <div class="stage-sub">切换不同风格查看同一组卡片在不同视觉语言下的效果。</div>
+      </div>
+      <div class="theme-tabs" id="themeTabs"></div>
+    </div>
+    <div class="theme-panels" id="themePanels"></div>
+  `;
 
-  /* Build dark column */
-  const darkCol=document.createElement('div');darkCol.className='theme-column';
-  darkCol.innerHTML=`<div class="column-header"><h3 class="dark-title">🌙 深色主题</h3><button class="col-dl-btn" onclick="downloadAll('dark')">下载全部</button></div>`;
-  const darkPages=document.createElement('div');darkPages.className='pages-col';
-  data.forEach((sec,idx)=>{
-    const pw=createPageWrapper(sec,idx,'dark',data);
-    darkPages.appendChild(pw);
-  });
-  darkCol.appendChild(darkPages);
+  const tabs=stage.querySelector('#themeTabs');
+  const panels=stage.querySelector('#themePanels');
 
-  container.appendChild(lightCol);
-  container.appendChild(darkCol);
+  THEME_CONFIGS.forEach(theme=>{
+    const tab=document.createElement('button');
+    tab.className='theme-tab';
+    tab.type='button';
+    tab.dataset.theme=theme.id;
+    tab.innerHTML=`<span class="tab-icon">${theme.icon}</span><span>${escapeHtml(theme.label)}</span>`;
+    tab.onclick=()=>switchTheme(theme.id);
+    tabs.appendChild(tab);
 
-  /* Bind all uploads */
-  data.forEach((sec,idx)=>{
-    bindUpload(`light-${idx}`);
-    bindUpload(`dark-${idx}`);
+    const panel=document.createElement('div');
+    panel.className='theme-panel';
+    panel.dataset.theme=theme.id;
+    panel.id=`theme-panel-${theme.id}`;
+
+    const column=document.createElement('div');
+    column.className='theme-column';
+    column.innerHTML=`
+      <div class="column-header">
+        <div class="column-header-copy">
+          <h3>${theme.icon} ${escapeHtml(theme.label)}</h3>
+          <p>${escapeHtml(theme.description)}</p>
+        </div>
+        <button class="col-dl-btn" type="button" onclick="downloadAll('${theme.id}')">下载全部</button>
+      </div>
+    `;
+
+    const pages=document.createElement('div');
+    pages.className='pages-col';
+    data.forEach((sec,idx)=>{
+      const pw=createPageWrapper(sec,idx,theme,data);
+      pages.appendChild(pw);
+    });
+    column.appendChild(pages);
+    panel.appendChild(column);
+    panels.appendChild(panel);
   });
+
+  themeWorkspace.appendChild(stage);
+
+  data.forEach((sec,idx)=>{
+    THEME_CONFIGS.forEach(theme=>bindUpload(`${theme.id}-${idx}`));
+  });
+
+  if(!THEME_CONFIGS.some(theme=>theme.id===activeThemeId))activeThemeId=THEME_CONFIGS[0].id;
+  switchTheme(activeThemeId);
 }
 
 function createPageWrapper(sec,idx,theme,data){
@@ -577,9 +697,9 @@ function createPageWrapper(sec,idx,theme,data){
   const page=buildPage(sec,idx,theme,data);
   inner.appendChild(page);
   const dlBtn=document.createElement('button');
-  dlBtn.className='dl-btn';dlBtn.id=`dl-${theme}-${idx}`;
+  dlBtn.className='dl-btn';dlBtn.id=`dl-${theme.id}-${idx}`;
   dlBtn.innerHTML=`<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 12l-4-4h2.5V2h3v6H12L8 12zm-5 2h10v-1.5H3V14z"/></svg> 下载`;
-  dlBtn.onclick=()=>downloadOne(idx,theme);
+  dlBtn.onclick=()=>downloadOne(idx,theme.id);
   inner.appendChild(dlBtn);
   const lbl=document.createElement('div');lbl.className='page-num';
   lbl.textContent=idx===0?'封面':`第 ${idx} 页`;
@@ -590,27 +710,28 @@ function createPageWrapper(sec,idx,theme,data){
 function buildPage(sec,idx,theme,data){
   const page=document.createElement('div');
   const isFirst=idx===0;
+  page.dataset.theme=theme.id;
   if(isFirst){
-    page.className=theme==='light'?'page cover-lp':'page cover';
-    page.id=`page-${theme}-${idx}`;
+    page.className=theme.family==='light'?'page cover-lp':'page cover';
+    page.id=`page-${theme.id}-${idx}`;
     page.innerHTML=coverHTML(sec,idx,theme,data);
-  } else if(theme==='dark'){
+  } else if(theme.family==='dark'){
     page.className='page dp';
-    page.id=`page-${theme}-${idx}`;
-    page.innerHTML=darkHTML(sec,idx,data);
+    page.id=`page-${theme.id}-${idx}`;
+    page.innerHTML=darkHTML(sec,idx,theme,data);
   } else {
     page.className='page lp';
-    page.id=`page-${theme}-${idx}`;
-    page.innerHTML=lightHTML(sec,idx,data);
+    page.id=`page-${theme.id}-${idx}`;
+    page.innerHTML=lightHTML(sec,idx,theme);
   }
   return page;
 }
 
 function coverHTML(sec,idx,theme){
   const[g,w]=splitGold(sec.title);
-  const photoId=`photo-${theme}-${idx}`;
-  const phId=`ph-${theme}-${idx}`;
-  const rhClass=theme==='light'?'rh-light':'rh-dark';
+  const photoId=`photo-${theme.id}-${idx}`;
+  const phId=`ph-${theme.id}-${idx}`;
+  const rhClass=theme.family==='light'?'rh-light':'rh-dark';
   return `<div class="cover-photo img-zone" id="${photoId}">
     <div class="imgph" id="${phId}">
       <div class="up-icon">＋</div>
@@ -618,7 +739,7 @@ function coverHTML(sec,idx,theme){
     </div>
     <div class="change-btn">更换图片</div>
   </div>
-  <div class="resize-handle ${rhClass}" data-resize="cover" data-page-id="page-${theme}-${idx}"></div>
+  <div class="resize-handle ${rhClass}" data-resize="cover" data-page-id="page-${theme.id}-${idx}"></div>
   <div class="cover-text">
     <div class="cover-tag" data-editable>${escapeHtml(sec.tag||'趋势观察')}</div>
     <div class="cover-title" data-editable><span class="g">${g}</span>${w}</div>
@@ -627,12 +748,11 @@ function coverHTML(sec,idx,theme){
   </div>`;
 }
 
-function darkHTML(sec,idx,data){
+function darkHTML(sec,idx,theme,data){
   const badge=escapeHtml(sec.badge||autoBadge(idx,sec.title));
   const cat=escapeHtml(sec.category||autoCategory(idx,sec.title));
-  const photoId=`photo-dark-${idx}`;
-  const phId=`ph-dark-${idx}`;
-  const dlBtnId=`dl-dark-${idx}`;
+  const photoId=`photo-${theme.id}-${idx}`;
+  const phId=`ph-${theme.id}-${idx}`;
   return `<div class="cat" data-editable>${cat}</div>
   <div class="dp-content">
     <div class="badge" data-editable>${badge}</div>
@@ -640,23 +760,22 @@ function darkHTML(sec,idx,data){
     <div class="fsub" data-editable>${escapeHtml(sec.sub)}</div>
     <div class="dbox"><p data-editable>${escapeHtml(sec.body)}</p></div>
   </div>
-  <div class="move-handle mh-dark" data-move="dp" data-page-id="page-dark-${idx}"></div>
+  <div class="move-handle mh-dark" data-move="dp" data-page-id="page-${theme.id}-${idx}"></div>
   <div class="imgzone img-zone" id="${photoId}">
-    <button class="dl-btn" id="${dlBtnId}" onclick="downloadOne(${idx},'dark')"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 12l-4-4h2.5V2h3v6H12L8 12zm-5 2h10v-1.5H3V14z"/></svg> 下载</button>
     <div class="imgph" id="${phId}">
       <span class="icon">🖼</span>
       <span>点击上传图片</span>
     </div>
     <div class="change-btn">更换图片</div>
-    <div class="resize-handle rh-dark" data-resize="dp" data-page-id="page-dark-${idx}"></div>
+    <div class="resize-handle rh-dark" data-resize="dp" data-page-id="page-${theme.id}-${idx}"></div>
   </div>`;
 }
 
-function lightHTML(sec,idx){
+function lightHTML(sec,idx,theme){
   const badge=escapeHtml(sec.badge||autoBadge(idx,sec.title));
   const cat=escapeHtml(sec.category||autoCategory(idx,sec.title));
-  const photoId=`photo-light-${idx}`;
-  const phId=`ph-light-${idx}`;
+  const photoId=`photo-${theme.id}-${idx}`;
+  const phId=`ph-${theme.id}-${idx}`;
   return `<div class="cat" data-editable>${cat}</div>
   <div class="card">
     <div class="card-top">
@@ -668,14 +787,14 @@ function lightHTML(sec,idx){
       <hr class="divider">
       <p class="dtext" data-editable>${escapeHtml(sec.body)}</p>
     </div>
-    <div class="move-handle mh-light" data-move="lp" data-page-id="page-light-${idx}"></div>
+    <div class="move-handle mh-light" data-move="lp" data-page-id="page-${theme.id}-${idx}"></div>
     <div class="card-img img-zone" id="${photoId}">
       <div class="imgph" id="${phId}">
         <span class="icon">🖼</span>
         <span>点击上传图片</span>
       </div>
       <div class="change-btn">更换图片</div>
-      <div class="resize-handle rh-light" data-resize="lp" data-page-id="page-light-${idx}"></div>
+      <div class="resize-handle rh-light" data-resize="lp" data-page-id="page-${theme.id}-${idx}"></div>
     </div>
   </div>`;
 }
@@ -1197,8 +1316,10 @@ async function downloadOne(idx,theme){
   const exportScale=getExportScale(page);
   const exportWidth=Math.max(page.scrollWidth, page.offsetWidth, 1);
   const exportHeight=Math.max(page.scrollHeight, page.offsetHeight, 1);
-  btn.style.opacity='0';
-  btn.style.pointerEvents='none';
+  if(btn){
+    btn.style.opacity='0';
+    btn.style.pointerEvents='none';
+  }
   document.querySelectorAll('[contenteditable="true"]').forEach(exitEdit);
   const cbs=page.querySelectorAll('.change-btn');
   const ictrs=page.querySelectorAll('.img-controls');
@@ -1232,7 +1353,7 @@ async function downloadOne(idx,theme){
       }
     });
     
-    const themeLabel=theme==='light'?'浅色':'深色';
+    const themeLabel=getThemeConfig(theme).downloadLabel;
     await downloadCanvasAsPng(canvas, idx===0?`${themeLabel}-封面.png`:`${themeLabel}-第${idx}页.png`);
   }catch(err){alert('下载失败: '+err.message);}
   finally{
@@ -1242,9 +1363,11 @@ async function downloadOne(idx,theme){
       zone.style.backgroundPosition = bgPosition;
       if (img.parentNode) img.parentNode.removeChild(img);
     });
-    btn.style.opacity='';
-    btn.style.pointerEvents='';
-    btn.innerHTML=`<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 12l-4-4h2.5V2h3v6H12L8 12zm-5 2h10v-1.5H3V14z"/></svg> 下载`;
+    if(btn){
+      btn.style.opacity='';
+      btn.style.pointerEvents='';
+      btn.innerHTML=`<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 12l-4-4h2.5V2h3v6H12L8 12zm-5 2h10v-1.5H3V14z"/></svg> 下载`;
+    }
     cbs.forEach(b=>{b.style.opacity='';b.style.pointerEvents='';});
     ictrs.forEach(c=>{c.style.opacity='';c.style.pointerEvents='';});
     rhs.forEach(r=>{r.style.display='';});
@@ -1253,11 +1376,18 @@ async function downloadOne(idx,theme){
 }
 
 async function downloadAll(theme){
-  if(!theme){alert('请选择下载浅色或深色主题');return;}
+  const themeId=theme||activeThemeId;
+  if(!themeId){alert('请选择主题');return;}
+  const previousThemeId=activeThemeId;
+  if(themeId!==activeThemeId){
+    switchTheme(themeId);
+    await new Promise(resolve=>requestAnimationFrame(resolve));
+  }
   for(let i=0;i<6;i++){
-    await downloadOne(i,theme);
+    await downloadOne(i,themeId);
     await new Promise(r=>setTimeout(r,300));
   }
+  if(previousThemeId!==themeId)switchTheme(previousThemeId);
 }
 
 toggleLlmSettingsBtn.addEventListener('click',()=>{
