@@ -801,6 +801,58 @@ function computeBgDrawRect(imgW, imgH, containerW, containerH, bgSizeVal, bgPosV
   return {dx, dy, drawW, drawH};
 }
 
+async function buildExportImageReplacement(zone) {
+  const bgUrl = parseBgUrl(zone.style.backgroundImage);
+  if (!bgUrl) return null;
+
+  const originalBgImage = zone.style.backgroundImage;
+  const originalBgSize = zone.style.backgroundSize;
+  const originalBgPosition = zone.style.backgroundPosition;
+
+  let img = _imageCache[bgUrl];
+  if (!img) {
+    img = await loadImage(bgUrl);
+    _imageCache[bgUrl] = img;
+  }
+
+  const zoneWidth = zone.offsetWidth;
+  const zoneHeight = zone.offsetHeight;
+  const {dx, dy, drawW, drawH} = computeBgDrawRect(
+    img.naturalWidth,
+    img.naturalHeight,
+    zoneWidth,
+    zoneHeight,
+    zone.style.backgroundSize,
+    zone.style.backgroundPosition,
+  );
+
+  const exportImg = document.createElement('img');
+  exportImg.src = bgUrl;
+  exportImg.style.position = 'absolute';
+  exportImg.style.left = `${dx}px`;
+  exportImg.style.top = `${dy}px`;
+  exportImg.style.width = `${drawW}px`;
+  exportImg.style.height = `${drawH}px`;
+  exportImg.style.maxWidth = 'none';
+  exportImg.style.maxHeight = 'none';
+  exportImg.style.pointerEvents = 'none';
+  exportImg.style.userSelect = 'none';
+
+  zone.style.backgroundImage = 'none';
+  zone.style.backgroundSize = 'auto';
+  zone.style.backgroundPosition = '0px 0px';
+  zone.style.position = zone.style.position || 'relative';
+  zone.appendChild(exportImg);
+
+  return {
+    zone,
+    bgImage: originalBgImage,
+    bgSize: originalBgSize,
+    bgPosition: originalBgPosition,
+    img: exportImg,
+  };
+}
+
 /* After html2canvas renders, overlay original images at full quality */
 async function overlayOriginalImages(canvas, pageEl, scale) {
   const ctx = canvas.getContext('2d');
@@ -1156,41 +1208,18 @@ async function downloadOne(idx,theme){
   ictrs.forEach(c=>{c.style.opacity='0';c.style.pointerEvents='none';});
   rhs.forEach(r=>{r.style.display='none';});
   mhs.forEach(m=>{m.style.display='none';});
-  
-  /* Convert background images to <img> elements for high-quality rendering */
-  const zonesWithBg = page.querySelectorAll('.img-zone[data-has-bg]');
+  const zonesWithBg = Array.from(page.querySelectorAll('.img-zone[data-has-bg]'));
   const imgReplacements = [];
-  zonesWithBg.forEach(zone => {
-    const bgUrl = parseBgUrl(zone.style.backgroundImage);
-    if (!bgUrl) return;
-    
-    /* Create an <img> element to replace the background */
-    const img = document.createElement('img');
-    img.src = bgUrl;
-    img.style.position = 'absolute';
-    img.style.top = '0';
-    img.style.left = '0';
-    img.style.width = '100%';
-    img.style.height = '100%';
-    img.style.objectFit = zone.style.backgroundSize === 'contain' ? 'contain' : 'cover';
-    img.style.objectPosition = 'center';
-    img.style.zIndex = '1';
-    img.style.pointerEvents = 'none';
-    
-    /* Store original background for restoration */
-    imgReplacements.push({
-      zone,
-      bgImage: zone.style.backgroundImage,
-      bgSize: zone.style.backgroundSize,
-      bgPosition: zone.style.backgroundPosition,
-      img
-    });
-    
-    /* Replace background with <img> */
-    zone.style.backgroundImage = 'none';
-    zone.style.position = zone.style.position || 'relative';
-    zone.appendChild(img);
-  });
+  for (const zone of zonesWithBg) {
+    try {
+      const replacement = await buildExportImageReplacement(zone);
+      if (replacement) {
+        imgReplacements.push(replacement);
+      }
+    } catch (err) {
+      console.warn('Failed to prepare export image replacement:', err);
+    }
+  }
   
   try{
     const canvas=await html2canvas(page,{
@@ -1207,14 +1236,12 @@ async function downloadOne(idx,theme){
     await downloadCanvasAsPng(canvas, idx===0?`${themeLabel}-封面.png`:`${themeLabel}-第${idx}页.png`);
   }catch(err){alert('下载失败: '+err.message);}
   finally{
-    /* Restore original background images */
     imgReplacements.forEach(({zone, bgImage, bgSize, bgPosition, img}) => {
       zone.style.backgroundImage = bgImage;
       zone.style.backgroundSize = bgSize;
       zone.style.backgroundPosition = bgPosition;
       if (img.parentNode) img.parentNode.removeChild(img);
     });
-    
     btn.style.opacity='';
     btn.style.pointerEvents='';
     btn.innerHTML=`<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 12l-4-4h2.5V2h3v6H12L8 12zm-5 2h10v-1.5H3V14z"/></svg> 下载`;
