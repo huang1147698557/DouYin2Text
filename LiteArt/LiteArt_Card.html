@@ -358,6 +358,9 @@ function switchTheme(themeId) {
     panel.classList.toggle('active', panel.dataset.theme === activeThemeId);
   });
   updateActiveThemeDownloadButton();
+  
+  // Restore images for the current theme
+  setTimeout(() => restoreThemeImages(activeThemeId), 50);
 }
 
 function downloadActiveTheme() {
@@ -628,6 +631,11 @@ AI 正以前所未有的速度渗透各行各业，从医疗诊断到自动驾�
 function generate(){
   const raw=inputText.value;
   const data=parseInput(raw);
+  currentData = data;  // Store current data globally
+  
+  // Save current images before clearing
+  const savedImages = {...sharedImageData};
+  
   themeWorkspace.innerHTML='';
   document.getElementById('file-inputs').innerHTML='';
   showStatus('卡片已刷新，可继续编辑文字或上传图片。','success');
@@ -690,6 +698,10 @@ function generate(){
   data.forEach((sec,idx)=>{
     THEME_CONFIGS.forEach(theme=>bindUpload(`${theme.id}-${idx}`));
   });
+
+  // Restore images from shared storage
+  sharedImageData = savedImages;
+  setTimeout(() => restoreAllImages(), 50);
 
   if(!THEME_CONFIGS.some(theme=>theme.id===activeThemeId))activeThemeId=THEME_CONFIGS[0].id;
   switchTheme(activeThemeId);
@@ -842,6 +854,62 @@ function bindUpload(key){
   },0);
 }
 
+function restoreAllImages(){
+  if(!currentData) return;
+  
+  THEME_CONFIGS.forEach(theme => {
+    currentData.forEach((sec, idx) => {
+      if(sharedImageData[idx]){
+        const key = `${theme.id}-${idx}`;
+        restoreImageToZone(key, sharedImageData[idx]);
+      }
+    });
+  });
+}
+
+function restoreThemeImages(themeId){
+  if(!currentData) return;
+  
+  currentData.forEach((sec, idx) => {
+    if(sharedImageData[idx]){
+      const key = `${themeId}-${idx}`;
+      restoreImageToZone(key, sharedImageData[idx]);
+    }
+  });
+}
+
+function restoreImageToZone(key, imageData){
+  const zone=document.getElementById(`photo-${key}`);
+  const ph=document.getElementById(`ph-${key}`);
+  if(!zone) return;
+  
+  if(ph)ph.style.display='none';
+  zone.dataset.bgx=imageData.bgx||'0';
+  zone.dataset.bgy=imageData.bgy||'0';
+  zone.dataset.hasBg='1';
+  zone.dataset.zoom=imageData.zoom||'100';
+  zone.dataset.fitMode=imageData.fitMode||'cover';
+  zone.style.backgroundImage=`url(${imageData.src})`;
+  zone.style.backgroundSize=imageData.fitMode==='contain'?'contain':(imageData.fitMode==='cover'?'cover':(imageData.zoom||'100')+'%');
+  zone.style.backgroundPosition=`calc(50% + ${imageData.bgx}px) calc(50% + ${imageData.bgy}px)`;
+  buildImgControls(zone,key);
+  
+  // Restore slider value
+  setTimeout(() => {
+    const slider = zone.querySelector('.zoom-slider');
+    const valSpan = zone.querySelector('.zoom-val');
+    const fitBtn = zone.querySelector('.fit-btn');
+    if(slider && imageData.fitMode === 'custom') {
+      slider.value = imageData.zoom || 100;
+      valSpan.textContent = (imageData.zoom || 100) + '%';
+    } else if(fitBtn && imageData.fitMode === 'contain') {
+      fitBtn.textContent = '包含';
+      fitBtn.classList.add('active');
+      if(valSpan) valSpan.textContent = '—';
+    }
+  }, 10);
+}
+
 function triggerUpload(key){document.getElementById(`fi-${key}`)?.click();}
 
 const EXPORT_TARGET_LONG_EDGE = 2400;
@@ -850,6 +918,10 @@ const EXPORT_MAX_SCALE = 5;
 
 /* Store original Image objects for high-quality export */
 const _imageCache = {};
+
+/* Global image data storage - shared across all themes */
+let sharedImageData = {};
+let currentData = null;
 
 function getExportScale(el){
   const rect = el.getBoundingClientRect();
@@ -1078,6 +1150,16 @@ function setImage(key,src){
   /* Pre-cache image for high-quality export */
   loadImage(src).then(img => { _imageCache[src] = img; }).catch(()=>{});
   buildImgControls(zone,key);
+  
+  // Save image to shared storage (key -> idx mapping)
+  const idx = key.split('-').pop();
+  sharedImageData[idx] = {
+    src: src,
+    bgx: '0',
+    bgy: '0',
+    zoom: '100',
+    fitMode: 'cover'
+  };
 }
 
 function buildImgControls(zone,key){
@@ -1106,6 +1188,13 @@ function buildImgControls(zone,key){
     zone.style.backgroundSize=v+'%';
     fitBtn.classList.remove('active');
     fitBtn.textContent='铺满';
+    
+    // Save to shared storage
+    const idx = key.split('-').pop();
+    if(sharedImageData[idx]) {
+      sharedImageData[idx].zoom = v;
+      sharedImageData[idx].fitMode = 'custom';
+    }
   };
   slider.onmousedown=(e)=>e.stopPropagation();
 
@@ -1118,12 +1207,26 @@ function buildImgControls(zone,key){
       fitBtn.textContent='包含';
       fitBtn.classList.add('active');
       slider.value=100;valSpan.textContent='—';
+      
+      // Save to shared storage
+      const idx = key.split('-').pop();
+      if(sharedImageData[idx]) {
+        sharedImageData[idx].fitMode = 'contain';
+        sharedImageData[idx].zoom = '100';
+      }
     } else {
       zone.dataset.fitMode='cover';
       zone.style.backgroundSize='cover';
       fitBtn.textContent='铺满';
       fitBtn.classList.remove('active');
       zone.dataset.zoom='100';slider.value=100;valSpan.textContent='100%';
+      
+      // Save to shared storage
+      const idx = key.split('-').pop();
+      if(sharedImageData[idx]) {
+        sharedImageData[idx].fitMode = 'cover';
+        sharedImageData[idx].zoom = '100';
+      }
     }
   };
 
@@ -1155,7 +1258,18 @@ document.addEventListener('mousemove',(e)=>{
   dragState.zone.dataset.bgx=nx;dragState.zone.dataset.bgy=ny;
   dragState.zone.style.backgroundPosition=`calc(50% + ${nx}px) calc(50% + ${ny}px)`;
 });
-document.addEventListener('mouseup',()=>{dragState=null;});
+document.addEventListener('mouseup',()=>{
+  if(dragState) {
+    // Save position to shared storage
+    const zoneId = dragState.zone.id;
+    const idx = zoneId.split('-').pop();
+    if(sharedImageData[idx]) {
+      sharedImageData[idx].bgx = dragState.zone.dataset.bgx;
+      sharedImageData[idx].bgy = dragState.zone.dataset.bgy;
+    }
+  }
+  dragState=null;
+});
 
 /* MOVE HANDLE DRAG — moves image zone container up/down */
 let moveState=null;
